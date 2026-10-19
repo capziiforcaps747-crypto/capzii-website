@@ -158,48 +158,99 @@ footer{background:var(--white);border-top:1px solid rgba(0,0,0,0.08);padding:60p
 .logo-tap-hint{position:fixed;bottom:20px;right:20px;background:var(--black);color:var(--beige);padding:8px 14px;border-radius:var(--radius-full);font-size:11px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
 
 /* ── ADMIN PANEL ── */
-.admin-panel{position:fixed;inset:0;background:var(--black);z-index:2000;display:none;flex-direction:column;overflow:hidden}
+.admin-panel{position:fixed;inset:0;z-index:2000;display:none;flex-direction:column;overflow:hidden;background:#F7F5F2;font-family:'Poppins',sans-serif}
 .admin-panel.open{display:flex}
-.admin-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-.admin-logo{font-size:16px;font-weight:900;letter-spacing:2px;color:var(--white)}
-.admin-logo span{color:var(--beige)}
-.admin-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:22px;padding:4px}
+
+/* top status bar */
+.admin-status-bar{background:var(--black);color:rgba(255,255,255,0.6);text-align:center;padding:7px;font-size:11px;font-weight:500;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:6px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#5C7A5C;display:inline-block}
+
+/* top header */
+.admin-header{background:#FFFFFF;border-bottom:1px solid rgba(0,0,0,0.08);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;flex-shrink:0}
+.admin-logo{font-size:15px;font-weight:900;letter-spacing:3px;color:var(--black);display:flex;align-items:center;gap:10px}
+.admin-badge{background:var(--black);color:var(--beige);font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;border-radius:var(--radius-sm)}
+.admin-header-right{display:flex;align-items:center;gap:12px}
+.admin-back-btn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#666;background:none;border:1px solid rgba(0,0,0,0.12);padding:7px 14px;border-radius:var(--radius-md);cursor:pointer;transition:all .15s;font-family:'Poppins',sans-serif}
+.admin-back-btn:hover{background:var(--black);color:var(--white);border-color:var(--black)}
+.admin-user-chip{display:flex;align-items:center;gap:8px;background:#F0EDE8;border-radius:var(--radius-full);padding:5px 12px 5px 5px}
+.admin-user-avatar{width:26px;height:26px;border-radius:50%;background:var(--black);color:var(--beige);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.admin-user-name{font-size:12px;font-weight:600;color:var(--black)}
+
+/* layout */
 .admin-body{display:flex;flex:1;overflow:hidden}
-.admin-sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:24px 12px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
-.admin-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-md);font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left}
-.admin-nav-item:hover{background:var(--surface2);color:var(--white)}
-.admin-nav-item.active{background:var(--beige);color:var(--black);font-weight:700}
-.admin-content{flex:1;overflow-y:auto;padding:32px}
+
+/* sidebar */
+.admin-sidebar{width:200px;background:#FFFFFF;border-right:1px solid rgba(0,0,0,0.08);padding:20px 10px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;overflow-y:auto}
+.admin-sidebar-section{font-size:9px;font-weight:700;letter-spacing:2px;color:#aaa;padding:16px 10px 6px;margin-top:4px}
+.admin-nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-md);font-size:12px;font-weight:500;color:#555;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'Poppins',sans-serif;position:relative}
+.admin-nav-item:hover{background:#F0EDE8;color:var(--black)}
+.admin-nav-item.active{background:var(--black);color:var(--white);font-weight:600}
+.admin-nav-item.active svg{stroke:var(--beige)}
+.admin-nav-badge{margin-left:auto;background:var(--beige);color:var(--black);font-size:9px;font-weight:800;padding:2px 6px;border-radius:var(--radius-full);min-width:18px;text-align:center}
+.admin-nav-item.active .admin-nav-badge{background:var(--beige);color:var(--black)}
+
+/* content */
+.admin-content{flex:1;overflow-y:auto;padding:28px 32px;background:#F7F5F2}
 .admin-tab{display:none}
 .admin-tab.active{display:block}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:32px}
-.kpi-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px 24px;border:1px solid var(--border)}
-.kpi-label{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px}
-.kpi-value{font-size:28px;font-weight:800;color:var(--white)}
-.kpi-sub{font-size:11px;color:var(--text-dim);margin-top:4px}
-.kpi-up{color:#5C7A5C}
-.kpi-down{color:#A8453B}
-.admin-section-title{font-size:20px;font-weight:800;color:var(--white);margin-bottom:20px}
-.table-wrap{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+
+/* page header */
+.admin-page-header{margin-bottom:24px}
+.admin-page-title{font-size:22px;font-weight:800;color:var(--black);letter-spacing:-.3px}
+.admin-page-sub{font-size:12px;color:#888;margin-top:2px;letter-spacing:.5px;text-transform:uppercase;font-weight:500}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+.kpi-card{background:#FFFFFF;border-radius:var(--radius-lg);padding:20px 22px;border:1px solid rgba(0,0,0,0.07);transition:box-shadow .2s}
+.kpi-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#999;margin-bottom:10px;text-transform:uppercase}
+.kpi-value{font-size:26px;font-weight:800;color:var(--black);line-height:1}
+.kpi-sub{font-size:11px;color:#aaa;margin-top:6px;font-weight:500}
+.kpi-up{color:#5C7A5C;font-weight:700}
+.kpi-down{color:#A8453B;font-weight:700}
+
+/* backend status card */
+.backend-card{background:#FFFFFF;border-radius:var(--radius-lg);padding:20px 24px;border:1px solid rgba(0,0,0,0.07);margin-bottom:24px}
+.backend-card-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:#999;margin-bottom:12px;text-transform:uppercase}
+.backend-status-row{display:flex;align-items:center;gap:8px}
+.backend-status-dot{width:8px;height:8px;border-radius:50%;background:#5C7A5C;flex-shrink:0}
+.backend-status-text{font-size:13px;font-weight:700;color:var(--black)}
+.backend-status-desc{font-size:11px;color:#888;margin-top:4px;line-height:1.5}
+
+/* table */
+.admin-section-title{font-size:14px;font-weight:800;color:var(--black);margin-bottom:14px;letter-spacing:-.2px}
+.table-wrap{background:#FFFFFF;border-radius:var(--radius-lg);overflow:hidden;border:1px solid rgba(0,0,0,0.07)}
 table{width:100%;border-collapse:collapse}
-th{background:var(--surface2);padding:12px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-dim)}
-td{padding:14px 16px;font-size:13px;color:rgba(242,242,242,0.8);border-top:1px solid var(--border)}
-tr:hover td{background:var(--surface2)}
-.badge-status{padding:4px 10px;border-radius:var(--radius-full);font-size:10px;font-weight:700}
-.badge-active{background:rgba(92,122,92,0.2);color:#5C7A5C}
-.badge-pending{background:rgba(190,164,122,0.2);color:var(--beige)}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.settings-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;border:1px solid var(--border)}
-.settings-card-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
-.settings-card-sub{font-size:12px;color:var(--text-dim);margin-bottom:16px}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+th{background:#F7F5F2;padding:11px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;text-transform:uppercase}
+td{padding:13px 16px;font-size:12px;color:#333;border-top:1px solid rgba(0,0,0,0.06)}
+tr:hover td{background:#FAFAF8}
+.badge-status{padding:3px 10px;border-radius:var(--radius-full);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.badge-active{background:#EEF5EE;color:#3A6B3A}
+.badge-pending{background:#FDF5E8;color:#8C6D3A}
+.badge-shipped{background:#E8EEF5;color:#3A5C8C}
+.badge-cancelled{background:#F5E8E8;color:#8C3A3A}
+.invoice-btn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--black);border:1px solid rgba(0,0,0,0.15);padding:5px 10px;border-radius:var(--radius-sm);cursor:pointer;background:none;font-family:'Poppins',sans-serif;letter-spacing:.5px;transition:all .15s}
+.invoice-btn:hover{background:var(--black);color:var(--white)}
+
+/* settings */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.settings-card{background:#FFFFFF;border-radius:var(--radius-lg);padding:22px;border:1px solid rgba(0,0,0,0.07)}
+.settings-card-title{font-size:13px;font-weight:800;color:var(--black);margin-bottom:2px}
+.settings-card-sub{font-size:11px;color:#aaa;margin-bottom:18px;font-weight:500}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
 .toggle-row:last-child{border-bottom:none}
-.toggle-label{font-size:13px;color:rgba(242,242,242,0.8)}
-.toggle{width:44px;height:24px;background:rgba(255,255,255,0.15);border-radius:var(--radius-full);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
-.toggle.on{background:var(--beige)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--white);transition:transform .2s}
-.toggle.on::after{transform:translateX(20px)}
-.loading{color:var(--text-dim);font-size:13px;padding:20px}
+.toggle-label{font-size:12px;color:#444;font-weight:500}
+.toggle-desc{font-size:10px;color:#aaa;margin-top:1px}
+.toggle{width:40px;height:22px;background:rgba(0,0,0,0.12);border-radius:var(--radius-full);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--black)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(18px)}
+.settings-input{width:100%;border:1px solid rgba(0,0,0,0.12);border-radius:var(--radius-md);padding:9px 12px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--black);outline:none;background:#FAFAF8;transition:border-color .15s;margin-top:4px}
+.settings-input:focus{border-color:var(--black)}
+.settings-save-btn{background:var(--black);color:#fff;border:none;padding:9px 20px;border-radius:var(--radius-md);font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;margin-top:12px;transition:background .15s}
+.settings-save-btn:hover{background:#333}
+
+.loading{color:#aaa;font-size:12px;padding:20px;font-weight:500}
 
 @media(max-width:768px){
   header{padding:0 16px}
@@ -450,84 +501,194 @@ tr:hover td{background:var(--surface2)}
 
 <!-- ADMIN PANEL -->
 <div class="admin-panel" id="admin-panel">
-  <div class="admin-header">
-    <span class="admin-logo">CAPZII <span>Admin</span></span>
-    <button class="admin-close" id="admin-close">✕</button>
+  <!-- Status bar -->
+  <div class="admin-status-bar">
+    <span class="status-dot"></span>
+    CONNECTED — Live Supabase database
   </div>
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="admin-logo">
+      CAPZII
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div class="admin-header-right">
+      <button class="admin-back-btn" id="admin-close">
+        ← BACK TO STORE
+      </button>
+      <div class="admin-user-chip">
+        <div class="admin-user-avatar" id="admin-avatar">A</div>
+        <span class="admin-user-name" id="admin-user-name">Admin</span>
+      </div>
+    </div>
+  </div>
+
   <div class="admin-body">
+    <!-- Sidebar -->
     <div class="admin-sidebar">
+      <p class="admin-sidebar-section">OVERVIEW</p>
       <button class="admin-nav-item active" data-tab="overview">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </button>
+      <button class="admin-nav-item" data-tab="orders">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Orders
+        <span class="admin-nav-badge" id="orders-badge">—</span>
+      </button>
+      <button class="admin-nav-item" data-tab="customers">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Customers
+        <span class="admin-nav-badge" id="customers-badge">—</span>
+      </button>
+      <p class="admin-sidebar-section">STORE</p>
       <button class="admin-nav-item" data-tab="products">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         Products
       </button>
-      <button class="admin-nav-item" data-tab="orders">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Orders
-      </button>
+      <p class="admin-sidebar-section">ACCOUNT</p>
       <button class="admin-nav-item" data-tab="settings">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         Settings
       </button>
+      <button class="admin-nav-item" onclick="adminLogout()" style="margin-top:auto;color:#A8453B">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
     </div>
+
     <div class="admin-content">
 
-      <!-- OVERVIEW -->
+      <!-- DASHBOARD -->
       <div class="admin-tab active" id="tab-overview">
-        <h2 class="admin-section-title">Dashboard</h2>
-        <div class="kpi-grid" id="kpi-grid">
-          <div class="kpi-card"><div class="kpi-label">REVENUE</div><div class="kpi-value" id="kpi-revenue">—</div><div class="kpi-sub">This month</div></div>
-          <div class="kpi-card"><div class="kpi-label">ORDERS</div><div class="kpi-value" id="kpi-orders">—</div><div class="kpi-sub">This month</div></div>
-          <div class="kpi-card"><div class="kpi-label">PRODUCTS</div><div class="kpi-value" id="kpi-products">—</div><div class="kpi-sub">Active</div></div>
-          <div class="kpi-card"><div class="kpi-label">CUSTOMERS</div><div class="kpi-value" id="kpi-customers">—</div><div class="kpi-sub">Total</div></div>
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Dashboard</h1>
+          <p class="admin-page-sub">CAPZII · LIVE STORE OVERVIEW</p>
         </div>
-      </div>
-
-      <!-- PRODUCTS -->
-      <div class="admin-tab" id="tab-products">
-        <h2 class="admin-section-title">Products</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">TOTAL ORDERS</div><div class="kpi-value" id="kpi-orders">—</div><div class="kpi-sub">Since launch</div></div>
+          <div class="kpi-card"><div class="kpi-label">REVENUE</div><div class="kpi-value" id="kpi-revenue">—</div><div class="kpi-sub">Cash on delivery</div></div>
+          <div class="kpi-card"><div class="kpi-label">ACTIVE PRODUCTS</div><div class="kpi-value" id="kpi-products">—</div><div class="kpi-sub">Visible in store</div></div>
+          <div class="kpi-card"><div class="kpi-label">CUSTOMERS</div><div class="kpi-value" id="kpi-customers">—</div><div class="kpi-sub">Total registered</div></div>
+        </div>
+        <div class="backend-card">
+          <div class="backend-card-title">BACKEND STATUS</div>
+          <div class="backend-status-row">
+            <div class="backend-status-dot"></div>
+            <span class="backend-status-text">CONNECTED</span>
+          </div>
+          <p class="backend-status-desc">Live Supabase database — every product, order, and setting is saved to the cloud in real time and available from any device.</p>
+        </div>
+        <div class="admin-section-title">RECENT ORDERS</div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead>
-            <tbody id="products-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+            <thead><tr><th>ID</th><th>CUSTOMER</th><th>TOTAL</th><th>DATE</th><th>STATUS</th><th></th></tr></thead>
+            <tbody id="orders-table"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
 
       <!-- ORDERS -->
       <div class="admin-tab" id="tab-orders">
-        <h2 class="admin-section-title">Recent Orders</h2>
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Orders</h1>
+          <p class="admin-page-sub">ALL ORDERS · CAPZII STORE</p>
+        </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody id="orders-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+            <thead><tr><th>ID</th><th>CUSTOMER</th><th>TOTAL</th><th>DATE</th><th>STATUS</th><th></th></tr></thead>
+            <tbody id="orders-table-full"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="admin-tab" id="tab-customers">
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Customers</h1>
+          <p class="admin-page-sub">REGISTERED USERS</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>NAME</th><th>EMAIL</th><th>JOINED</th><th>STATUS</th></tr></thead>
+            <tbody id="customers-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="admin-tab" id="tab-products">
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Products</h1>
+          <p class="admin-page-sub">EDIT NAME · PRICE · VISIBILITY</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>PRODUCT</th><th>PRICE</th><th>CATEGORY</th><th>STATUS</th></tr></thead>
+            <tbody id="products-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
 
       <!-- SETTINGS -->
       <div class="admin-tab" id="tab-settings">
-        <h2 class="admin-section-title">Settings</h2>
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Settings</h1>
+          <p class="admin-page-sub">ANNOUNCEMENT · WHATSAPP · SHIPPING</p>
+        </div>
         <div class="settings-grid">
           <div class="settings-card">
-            <p class="settings-card-title">Store</p>
-            <p class="settings-card-sub">Configure your store settings</p>
+            <p class="settings-card-title">Announcement Bar</p>
+            <p class="settings-card-sub">Shown at top of every page</p>
             <div class="toggle-row">
-              <span class="toggle-label">WhatsApp Order Button</span>
-              <button class="toggle" id="toggle-whatsapp"></button>
-            </div>
-            <div class="toggle-row">
-              <span class="toggle-label">Announcement Bar</span>
+              <div>
+                <div class="toggle-label">Show announcement bar</div>
+              </div>
               <button class="toggle on" id="toggle-announcement"></button>
             </div>
+            <div style="margin-top:12px">
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">TEXT</label>
+              <input class="settings-input" id="settings-announcement" placeholder="Free shipping on orders over 500 EGP" value="Free shipping on orders over 500 EGP">
+            </div>
+            <button class="settings-save-btn" onclick="saveAnnouncementSettings()">SAVE</button>
+          </div>
+          <div class="settings-card">
+            <p class="settings-card-title">WhatsApp</p>
+            <p class="settings-card-sub">Order button on product pages</p>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">WhatsApp Order Button</div>
+                <div class="toggle-desc">Show on all product pages</div>
+              </div>
+              <button class="toggle" id="toggle-whatsapp"></button>
+            </div>
+            <div style="margin-top:12px">
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">WHATSAPP NUMBER</label>
+              <input class="settings-input" id="settings-whatsapp-number" placeholder="201224621906" value="201224621906">
+            </div>
+            <button class="settings-save-btn" onclick="saveWhatsappSettings()">SAVE</button>
+          </div>
+          <div class="settings-card">
+            <p class="settings-card-title">Shipping</p>
+            <p class="settings-card-sub">Shown on product & checkout pages</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+              <div>
+                <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">COST (EGP)</label>
+                <input class="settings-input" id="settings-shipping-cost" placeholder="50" value="50">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">DURATION</label>
+                <input class="settings-input" id="settings-shipping-days" placeholder="5-7" value="5-7">
+              </div>
+            </div>
+            <button class="settings-save-btn" onclick="saveShippingSettings()">SAVE</button>
           </div>
           <div class="settings-card">
             <p class="settings-card-title">Account</p>
             <p class="settings-card-sub" id="admin-email-display">—</p>
-            <button class="btn-gold" id="logout-btn" style="margin-top:8px">Sign Out</button>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06)">
+              <button class="settings-save-btn" style="background:#A8453B" onclick="adminLogout()">SIGN OUT</button>
+            </div>
           </div>
         </div>
       </div>
@@ -676,10 +837,30 @@ document.getElementById('logo').addEventListener('click', e => {
   }
 });
 
+function isAdmin(user) {
+  const meta = user?.user_metadata || {};
+  const role = (meta.role || meta.user_role || '').toUpperCase();
+  return role === 'SUPER_ADMIN' || role === 'ADMIN';
+}
+
 async function checkAdminSession() {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) { openAdminPanel(session.user); }
-  else { openLoginModal(); }
+  if (session) {
+    if (isAdmin(session.user)) {
+      openAdminPanel(session.user);
+    } else {
+      showAdminDenied();
+    }
+  } else {
+    openLoginModal();
+  }
+}
+
+function showAdminDenied() {
+  const err = document.getElementById('login-error');
+  document.getElementById('login-modal').classList.add('open');
+  err.textContent = 'Access denied. This account is not authorized as admin.';
+  err.style.display = 'block';
 }
 
 // ── LOGIN MODAL ────────────────────────────────────────────
@@ -710,6 +891,11 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     err.textContent = 'Invalid email or password.';
     err.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Sign In';
+  } else if (!isAdmin(data.user)) {
+    await sb.auth.signOut();
+    err.textContent = 'Access denied. This account is not authorized as admin.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Sign In';
   } else {
     document.getElementById('login-modal').classList.remove('open');
     openAdminPanel(data.user);
@@ -720,19 +906,22 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 function openAdminPanel(user) {
   document.getElementById('admin-panel').classList.add('open');
   document.getElementById('admin-email-display').textContent = user.email;
+  const initials = (user.user_metadata?.full_name || user.email || 'A').charAt(0).toUpperCase();
+  document.getElementById('admin-avatar').textContent = initials;
+  document.getElementById('admin-user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
   loadAdminData();
 }
 
 document.getElementById('admin-close').onclick = () =>
   document.getElementById('admin-panel').classList.remove('open');
 
-document.getElementById('logout-btn').onclick = async () => {
+async function adminLogout() {
   await sb.auth.signOut();
   document.getElementById('admin-panel').classList.remove('open');
-};
+}
 
 // ── SIDEBAR NAV ────────────────────────────────────────────
-document.querySelectorAll('.admin-nav-item').forEach(btn => {
+document.querySelectorAll('.admin-nav-item[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -742,58 +931,112 @@ document.querySelectorAll('.admin-nav-item').forEach(btn => {
 });
 
 // ── LOAD ADMIN DATA ────────────────────────────────────────
+function fmtOrderRow(o) {
+  const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-GB') : '—';
+  const statusClass = o.status==='SHIPPED'?'badge-shipped':o.status==='CANCELLED'?'badge-cancelled':o.status==='PROCESSING'?'badge-pending':'badge-active';
+  return `<tr>
+    <td style="font-weight:700;font-size:11px">ORD-${o.id.slice(0,12).toUpperCase()}</td>
+    <td>${o.customerName||'—'}</td>
+    <td style="font-weight:700">${Number(o.totalAmount||0).toLocaleString()} EGP</td>
+    <td style="color:#aaa;font-size:11px">${date}</td>
+    <td><span class="badge-status ${statusClass}">${o.status||'PENDING'}</span></td>
+    <td><button class="invoice-btn">↑ INVOICE</button></td>
+  </tr>`;
+}
+
 async function loadAdminData() {
   try {
     const [products, orders, customers, settings] = await Promise.all([
-      sb.from('Product').select('id,name,basePrice,status').limit(20),
-      sb.from('Order').select('id,totalAmount,status,createdAt').order('createdAt',{ascending:false}).limit(20),
-      sb.from('User').select('id', {count:'exact', head:true}),
+      sb.from('Product').select('id,name,basePrice,status,category:Category(name)').limit(50),
+      sb.from('Order').select('id,totalAmount,status,createdAt,customerName').order('createdAt',{ascending:false}).limit(50),
+      sb.from('User').select('id,firstName,lastName,email,createdAt', {count:'exact'}).limit(50),
       sb.from('site_settings').select('key,value'),
     ]);
 
     // KPIs
-    const monthOrders = (orders.data||[]).filter(o => {
-      const d = new Date(o.createdAt);
-      const now = new Date();
-      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
-    });
-    const revenue = monthOrders.reduce((s,o)=>s+Number(o.totalAmount||0),0);
+    const allOrders = orders.data||[];
+    const revenue = allOrders.reduce((s,o)=>s+Number(o.totalAmount||0),0);
+    const activeProducts = (products.data||[]).filter(p=>p.status==='ACTIVE').length;
+    const custCount = customers.count || (customers.data||[]).length;
+
     document.getElementById('kpi-revenue').textContent = revenue.toLocaleString()+' EGP';
-    document.getElementById('kpi-orders').textContent = monthOrders.length;
-    document.getElementById('kpi-products').textContent = (products.data||[]).filter(p=>p.status==='ACTIVE').length;
-    document.getElementById('kpi-customers').textContent = customers.count || 0;
+    document.getElementById('kpi-orders').textContent = allOrders.length;
+    document.getElementById('kpi-products').textContent = activeProducts;
+    document.getElementById('kpi-customers').textContent = custCount;
+    document.getElementById('orders-badge').textContent = allOrders.length;
+    document.getElementById('customers-badge').textContent = custCount;
+
+    // Orders tables
+    const ordersHTML = allOrders.length
+      ? allOrders.map(fmtOrderRow).join('')
+      : '<tr><td colspan="6" class="loading">No orders yet</td></tr>';
+    document.getElementById('orders-table').innerHTML = ordersHTML;
+    document.getElementById('orders-table-full').innerHTML = ordersHTML;
 
     // Products table
-    const ptbody = document.getElementById('products-table');
-    ptbody.innerHTML = (products.data||[]).map(p=>`
-      <tr>
-        <td>${p.name}</td>
-        <td>${Number(p.basePrice).toLocaleString()} EGP</td>
-        <td>—</td>
-        <td><span class="badge-status ${p.status==='ACTIVE'?'badge-active':'badge-pending'}">${p.status}</span></td>
-      </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim)">No products found</td></tr>';
+    document.getElementById('products-table').innerHTML = (products.data||[]).length
+      ? (products.data||[]).map(p=>`<tr>
+          <td style="font-weight:600">${p.name}</td>
+          <td style="font-weight:700">${Number(p.basePrice).toLocaleString()} EGP</td>
+          <td style="color:#aaa;font-size:11px">${p.category?.name||'—'}</td>
+          <td><span class="badge-status ${p.status==='ACTIVE'?'badge-active':'badge-pending'}">${p.status}</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="loading">No products found</td></tr>';
 
-    // Orders table
-    const otbody = document.getElementById('orders-table');
-    otbody.innerHTML = (orders.data||[]).map(o=>`
-      <tr>
-        <td>${o.id.slice(0,8).toUpperCase()}</td>
-        <td>—</td>
-        <td>${Number(o.totalAmount||0).toLocaleString()} EGP</td>
-        <td><span class="badge-status badge-active">${o.status||'PENDING'}</span></td>
-      </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim)">No orders found</td></tr>';
+    // Customers table
+    document.getElementById('customers-table').innerHTML = (customers.data||[]).length
+      ? (customers.data||[]).map(u=>`<tr>
+          <td style="font-weight:600">${u.firstName||''} ${u.lastName||''}</td>
+          <td style="color:#888;font-size:11px">${u.email||'—'}</td>
+          <td style="color:#aaa;font-size:11px">${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-GB'):'—'}</td>
+          <td><span class="badge-status badge-active">ACTIVE</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="loading">No customers yet</td></tr>';
 
-    // Settings toggles
+    // Settings
     const settingsMap = {};
     (settings.data||[]).forEach(s=>settingsMap[s.key]=s.value);
+
     const waToggle = document.getElementById('toggle-whatsapp');
-    if (settingsMap['whatsapp_order_enabled'] !== 'false') waToggle.classList.add('on');
-    waToggle.addEventListener('click', async () => {
+    waToggle.className = 'toggle' + (settingsMap['whatsapp_order_enabled']!=='false'?' on':'');
+    waToggle.onclick = async () => {
       const isOn = waToggle.classList.toggle('on');
       await sb.from('site_settings').upsert({key:'whatsapp_order_enabled',value:isOn?'true':'false'},{onConflict:'key'});
-    });
+    };
+
+    const annToggle = document.getElementById('toggle-announcement');
+    annToggle.className = 'toggle' + (settingsMap['announcement_active']==='true'?' on':'');
+    annToggle.onclick = async () => {
+      const isOn = annToggle.classList.toggle('on');
+      await sb.from('site_settings').upsert({key:'announcement_active',value:isOn?'true':'false'},{onConflict:'key'});
+    };
+
+    if (settingsMap['announcement_text']) document.getElementById('settings-announcement').value = settingsMap['announcement_text'];
+    if (settingsMap['whatsapp_number']) document.getElementById('settings-whatsapp-number').value = settingsMap['whatsapp_number'];
+    if (settingsMap['shipping_cost']) document.getElementById('settings-shipping-cost').value = settingsMap['shipping_cost'];
+    if (settingsMap['shipping_days']) document.getElementById('settings-shipping-days').value = settingsMap['shipping_days'];
 
   } catch(e) { console.error('Admin data error:', e); }
+}
+
+async function saveAnnouncementSettings() {
+  const text = document.getElementById('settings-announcement').value;
+  await sb.from('site_settings').upsert({key:'announcement_text',value:text},{onConflict:'key'});
+  alert('Saved!');
+}
+async function saveWhatsappSettings() {
+  const num = document.getElementById('settings-whatsapp-number').value.replace(/\D/g,'');
+  await sb.from('site_settings').upsert({key:'whatsapp_number',value:num},{onConflict:'key'});
+  alert('Saved!');
+}
+async function saveShippingSettings() {
+  const cost = document.getElementById('settings-shipping-cost').value;
+  const days = document.getElementById('settings-shipping-days').value;
+  await Promise.all([
+    sb.from('site_settings').upsert({key:'shipping_cost',value:cost},{onConflict:'key'}),
+    sb.from('site_settings').upsert({key:'shipping_days',value:days},{onConflict:'key'}),
+  ]);
+  alert('Saved!');
 }
 
 // ── LOAD PRODUCTS (PUBLIC) ─────────────────────────────────
