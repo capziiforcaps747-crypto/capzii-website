@@ -618,15 +618,67 @@ tr:hover td{background:#FAFAF8}
 
       <!-- PRODUCTS -->
       <div class="admin-tab" id="tab-products">
-        <div class="admin-page-header">
-          <h1 class="admin-page-title">Products</h1>
-          <p class="admin-page-sub">EDIT NAME · PRICE · VISIBILITY</p>
+        <div class="admin-page-header" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <h1 class="admin-page-title">Products</h1>
+            <p class="admin-page-sub">ADD · EDIT · VISIBILITY</p>
+          </div>
+          <button class="settings-save-btn" onclick="showAddProductForm()" id="add-product-btn">+ ADD NEW PRODUCT</button>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>PRODUCT</th><th>PRICE</th><th>CATEGORY</th><th>STATUS</th></tr></thead>
-            <tbody id="products-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
-          </table>
+
+        <!-- ADD PRODUCT FORM -->
+        <div id="add-product-form" style="display:none;background:#fff;border-radius:12px;padding:28px;border:1px solid rgba(0,0,0,0.07);margin-bottom:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <p style="font-size:14px;font-weight:800;color:#111">New Product</p>
+            <button onclick="hideAddProductForm()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div style="grid-column:1/-1">
+              <label class="settings-input" style="all:unset;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">PRODUCT NAME *</label>
+              <input class="settings-input" id="np-name" placeholder="e.g. Capzii Onyx Six-Panel">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">PRICE (EGP) *</label>
+              <input class="settings-input" id="np-price" type="number" placeholder="300">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">COMPARE PRICE (EGP)</label>
+              <input class="settings-input" id="np-compare" type="number" placeholder="600 (optional)">
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">DESCRIPTION</label>
+              <textarea class="settings-input" id="np-desc" rows="3" placeholder="Premium 100% cotton twill cap..." style="resize:vertical"></textarea>
+            </div>
+          </div>
+
+          <!-- COLORS -->
+          <div style="margin-top:16px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">COLORS (up to 6)</label>
+            <div id="colors-list" style="display:flex;flex-direction:column;gap:8px"></div>
+            <button onclick="addColorRow()" style="margin-top:8px;background:none;border:1px dashed #ccc;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#888;cursor:pointer;width:100%;font-family:'Poppins',sans-serif">+ Add Color</button>
+          </div>
+
+          <!-- IMAGES -->
+          <div style="margin-top:16px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">PRODUCT IMAGES (up to 5 URLs)</label>
+            <div id="images-list" style="display:flex;flex-direction:column;gap:8px"></div>
+            <button onclick="addImageRow()" style="margin-top:8px;background:none;border:1px dashed #ccc;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#888;cursor:pointer;width:100%;font-family:'Poppins',sans-serif">+ Add Image URL</button>
+            <p style="font-size:10px;color:#bbb;margin-top:6px">Paste direct image URLs (from Imgur, Cloudinary, etc.)</p>
+          </div>
+
+          <div style="margin-top:20px;display:flex;gap:10px">
+            <button class="settings-save-btn" onclick="saveProduct()" id="save-product-btn" style="flex:1">SAVE PRODUCT</button>
+            <button onclick="hideAddProductForm()" style="flex:1;background:#f5f5f5;color:#333;border:none;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif">CANCEL</button>
+          </div>
+          <p id="product-save-msg" style="font-size:12px;margin-top:10px;display:none"></p>
+        </div>
+
+        <!-- PRODUCTS LIST -->
+        <div id="products-list-wrap">
+          <div id="products-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">
+            <div class="loading">Loading products...</div>
+          </div>
         </div>
       </div>
 
@@ -918,6 +970,7 @@ function openAdminPanel(user) {
   document.getElementById('admin-avatar').textContent = initials;
   document.getElementById('admin-user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
   loadAdminData();
+  loadAdminProducts();
 }
 
 document.getElementById('admin-close').onclick = () =>
@@ -1047,56 +1100,193 @@ async function saveShippingSettings() {
   alert('Saved!');
 }
 
-// ── LOAD PRODUCTS (PUBLIC) ─────────────────────────────────
-async function loadProducts() {
-  const grid = document.getElementById('products-grid');
+// ── ADMIN PRODUCTS ────────────────────────────────────────
+let colorCount = 0;
+let imageCount = 0;
+
+function showAddProductForm() {
+  document.getElementById('add-product-form').style.display = 'block';
+  document.getElementById('add-product-btn').style.display = 'none';
+  // reset
+  ['np-name','np-price','np-compare','np-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('colors-list').innerHTML = '';
+  document.getElementById('images-list').innerHTML = '';
+  document.getElementById('product-save-msg').style.display = 'none';
+  colorCount = 0; imageCount = 0;
+  addColorRow(); addImageRow();
+}
+
+function hideAddProductForm() {
+  document.getElementById('add-product-form').style.display = 'none';
+  document.getElementById('add-product-btn').style.display = 'block';
+}
+
+function addColorRow() {
+  if (colorCount >= 6) return;
+  colorCount++;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center';
+  div.innerHTML = `
+    <input class="settings-input" placeholder="Color name (e.g. Navy)" style="flex:2" data-color-name="${colorCount}">
+    <input type="color" value="#111111" data-color-hex="${colorCount}" style="width:40px;height:36px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:2px">
+    <button onclick="this.parentElement.remove();colorCount--" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:4px">✕</button>`;
+  document.getElementById('colors-list').appendChild(div);
+}
+
+function addImageRow() {
+  if (imageCount >= 5) return;
+  imageCount++;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center';
+  div.innerHTML = `
+    <input class="settings-input" placeholder="https://i.imgur.com/..." style="flex:1" data-img-url="${imageCount}">
+    <button onclick="this.parentElement.remove();imageCount--" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:4px">✕</button>`;
+  document.getElementById('images-list').appendChild(div);
+}
+
+async function saveProduct() {
+  const name = document.getElementById('np-name').value.trim();
+  const price = parseFloat(document.getElementById('np-price').value);
+  const compare = parseFloat(document.getElementById('np-compare').value) || null;
+  const desc = document.getElementById('np-desc').value.trim();
+  const msg = document.getElementById('product-save-msg');
+  const btn = document.getElementById('save-product-btn');
+
+  if (!name || !price) {
+    msg.textContent = 'Name and price are required.';
+    msg.style.color = '#A8453B';
+    msg.style.display = 'block';
+    return;
+  }
+
+  // collect colors
+  const colors = [];
+  document.querySelectorAll('[data-color-name]').forEach(inp => {
+    const cname = inp.value.trim();
+    const hex = document.querySelector(`[data-color-hex="${inp.dataset.colorName}"]`)?.value || '#111111';
+    if (cname) colors.push({ name: cname, hex });
+  });
+
+  // collect images
+  const images = [];
+  document.querySelectorAll('[data-img-url]').forEach((inp, i) => {
+    const url = inp.value.trim();
+    if (url) images.push({ url, isPrimary: i === 0, sortOrder: i });
+  });
+
+  btn.disabled = true; btn.textContent = 'SAVING...';
+  msg.style.display = 'none';
+
   try {
-    const { data: products } = await sb
-      .from('Product')
-      .select(`id,name,slug,basePrice,compareAtPrice,isLimitedEdition,
-        images:ProductImage(url,isPrimary),
-        variants:ProductVariant(color,colorCode,stock,price)`)
-      .eq('status','ACTIVE')
-      .order('createdAt',{ascending:false})
-      .limit(8);
+    // save to capzii_products table (simple, no Prisma needed)
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
+    const { data: product, error } = await sb.from('capzii_products').insert({
+      name, slug, description: desc,
+      base_price: price,
+      compare_price: compare,
+      status: 'ACTIVE',
+      colors: JSON.stringify(colors),
+      images: JSON.stringify(images),
+      created_at: new Date().toISOString(),
+    }).select().single();
 
-    if (!products || products.length === 0) {
-      grid.innerHTML = '<p style="color:#666;grid-column:1/-1">No products yet.</p>';
-      return;
-    }
+    if (error) throw error;
 
-    grid.innerHTML = products.map(p => {
-      const img = p.images?.find(i=>i.isPrimary) || p.images?.[0];
-      const price = Number(p.basePrice);
-      const compare = p.compareAtPrice ? Number(p.compareAtPrice) : null;
-      const discount = compare && compare>price ? Math.round(((compare-price)/compare)*100) : null;
-      const colors = (p.variants||[]).filter(v=>v.colorCode).slice(0,4);
-      return `
-        <a class="product-card" href="/products/${p.slug||p.id}">
-          <div class="product-img-wrap">
-            ${img ? `<img src="${img.url}" alt="${p.name}" loading="lazy">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:40px">🧢</div>`}
-            <div class="product-badges">
-              ${p.isLimitedEdition?'<span class="badge badge-gold">Limited</span>':''}
-              ${discount?`<span class="badge badge-red">-${discount}%</span>`:''}
-            </div>
-          </div>
-          <div class="product-info">
-            <p class="product-cat">ACCESSORIES</p>
-            <p class="product-name">${p.name}</p>
-            ${colors.length ? `<div class="product-colors">${colors.map(c=>`<div class="color-dot" style="background:${c.colorCode}" title="${c.color||''}"></div>`).join('')}</div>` : ''}
-            <div class="product-price">
-              <span class="price-now">${price.toLocaleString()} EGP</span>
-              ${compare && compare>price ? `<span class="price-was">${compare.toLocaleString()} EGP</span>` : ''}
-            </div>
-          </div>
-        </a>`;
-    }).join('');
+    msg.textContent = '✓ Product saved successfully!';
+    msg.style.color = '#5C7A5C';
+    msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
+    setTimeout(() => { hideAddProductForm(); loadAdminProducts(); loadPublicProducts(); }, 1200);
   } catch(e) {
-    grid.innerHTML = '<p style="color:#666;grid-column:1/-1">Could not load products.</p>';
+    msg.textContent = 'Error: ' + (e.message || 'Could not save product.');
+    msg.style.color = '#A8453B';
+    msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
   }
 }
 
-loadProducts();
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  await sb.from('capzii_products').delete().eq('id', id);
+  loadAdminProducts(); loadPublicProducts();
+}
+
+async function loadAdminProducts() {
+  const wrap = document.getElementById('products-cards');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading">Loading...</div>';
+  const { data, error } = await sb.from('capzii_products').select('*').order('created_at', {ascending: false});
+  if (error || !data || data.length === 0) {
+    wrap.innerHTML = '<div class="loading">No products yet. Add your first product above.</div>';
+    return;
+  }
+  wrap.innerHTML = data.map(p => {
+    const images = JSON.parse(p.images || '[]');
+    const colors = JSON.parse(p.colors || '[]');
+    const img = images[0]?.url || '';
+    return `
+      <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.07)">
+        <div style="aspect-ratio:1;background:#f7f5f2;overflow:hidden">
+          ${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:contain;padding:12px">` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:32px">🧢</div>'}
+        </div>
+        <div style="padding:12px">
+          <p style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px;line-height:1.3">${p.name}</p>
+          <p style="font-size:13px;font-weight:800;color:#111">${Number(p.base_price).toLocaleString()} EGP ${p.compare_price ? `<span style="font-size:11px;color:#aaa;font-weight:400;text-decoration:line-through">${Number(p.compare_price).toLocaleString()}</span>` : ''}</p>
+          ${colors.length ? `<div style="display:flex;gap:4px;margin-top:6px">${colors.map(c=>`<div title="${c.name}" style="width:12px;height:12px;border-radius:50%;background:${c.hex};border:1px solid rgba(0,0,0,0.15)"></div>`).join('')}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:10px">
+            <span style="background:#EEF5EE;color:#3A6B3A;font-size:9px;font-weight:700;padding:3px 8px;border-radius:99px">${p.status}</span>
+            <button onclick="deleteProduct('${p.id}')" style="margin-left:auto;background:none;border:none;color:#ccc;cursor:pointer;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif">DELETE</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadPublicProducts() {
+  const grid = document.getElementById('products-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="loading" style="color:#666;grid-column:1/-1">Loading products...</div>';
+
+  // Load from capzii_products (our simple table)
+  const { data, error } = await sb.from('capzii_products')
+    .select('*').eq('status','ACTIVE').order('created_at',{ascending:false}).limit(8);
+
+  if (error || !data || data.length === 0) {
+    // fallback to Product table from Next.js
+    loadProductsFallback();
+    return;
+  }
+
+  grid.innerHTML = data.map(p => {
+    const images = JSON.parse(p.images || '[]');
+    const colors = JSON.parse(p.colors || '[]');
+    const img = images[0]?.url || '';
+    const price = Number(p.base_price);
+    const compare = p.compare_price ? Number(p.compare_price) : null;
+    const discount = compare && compare > price ? Math.round(((compare-price)/compare)*100) : null;
+    return `
+      <div class="product-card">
+        <div class="product-img-wrap">
+          ${img ? `<img src="${img}" alt="${p.name}" loading="lazy">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:40px">🧢</div>'}
+          <div class="product-badges">
+            ${discount ? `<span class="badge badge-red">-${discount}%</span>` : ''}
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-cat">CAPZII</p>
+          <p class="product-name">${p.name}</p>
+          ${colors.length ? `<div class="product-colors">${colors.map(c=>`<div class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`).join('')}</div>` : ''}
+          <div class="product-price">
+            <span class="price-now">${price.toLocaleString()} EGP</span>
+            ${compare && compare > price ? `<span class="price-was">${compare.toLocaleString()} EGP</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// Initial load
+loadPublicProducts();
 </script>
 </body>
 </html>
