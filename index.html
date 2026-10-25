@@ -63,26 +63,82 @@ nav a:hover,nav a.active{color:var(--black)}
 .section-title{font-size:28px;font-weight:900;color:var(--black)}
 .section-link{font-size:13px;font-weight:600;color:var(--black);text-decoration:none;border-bottom:1.5px solid var(--beige);padding-bottom:2px}
 
-/* ── PRODUCTS ── */
-.products-section{background:var(--fog)}
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
-.product-card{background:var(--white);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
-.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.12)}
-.product-img-wrap{position:relative;aspect-ratio:1;background:var(--fog);overflow:hidden}
-.product-img-wrap img{width:100%;height:100%;object-fit:contain;padding:16px;transition:transform .4s}
-.product-card:hover .product-img-wrap img{transform:scale(1.05)}
-.product-badges{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px}
+/* ── SHOP SECTION ── */
+.products-section{background:#F7F5F2;padding:0}
+.shop-toolbar{max-width:1400px;margin:0 auto;padding:20px 32px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.filter-tab{padding:7px 18px;border-radius:var(--radius-full);font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;border:1.5px solid rgba(0,0,0,0.12);background:transparent;color:#555;font-family:'Poppins',sans-serif;transition:all .15s}
+.filter-tab:hover{border-color:var(--black);color:var(--black)}
+.filter-tab.active{background:var(--black);color:var(--white);border-color:var(--black)}
+.view-modes{display:flex;gap:4px}
+.view-btn{width:32px;height:32px;border:1.5px solid rgba(0,0,0,0.12);border-radius:var(--radius-sm);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#aaa;transition:all .15s}
+.view-btn:hover,.view-btn.active{border-color:var(--black);color:var(--black);background:var(--black)}
+.view-btn.active svg{stroke:#fff}
+
+/* grid modes */
+.products-grid{display:grid;gap:2px;padding:16px 32px 80px;max-width:1400px;margin:0 auto}
+.products-grid.view-4{grid-template-columns:repeat(4,1fr)}
+.products-grid.view-2{grid-template-columns:repeat(2,1fr)}
+.products-grid.view-1{grid-template-columns:1fr}
+
+/* product card — Primora style */
+.product-card{position:relative;cursor:pointer;overflow:hidden;background:#E8E4DF}
+.product-card:hover .product-img-wrap img{transform:scale(1.04)}
+.product-img-count{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.35);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px)}
+.product-sold-badge{position:absolute;top:10px;left:10px;background:var(--beige);color:var(--black);font-size:9px;font-weight:800;padding:4px 10px;letter-spacing:1px}
+.product-sale-badge{position:absolute;top:10px;left:10px;background:#111;color:var(--beige);font-size:9px;font-weight:800;padding:4px 10px;letter-spacing:1px}
+.product-img-wrap{aspect-ratio:3/4;overflow:hidden;background:#E8E4DF}
+.products-grid.view-1 .product-img-wrap{aspect-ratio:16/7}
+.product-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.product-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;color:#ccc}
+.product-info{padding:12px 8px 16px;background:#F7F5F2}
+.product-cat{font-size:9px;font-weight:700;letter-spacing:2px;color:#aaa;margin-bottom:4px;text-transform:uppercase}
+.product-name{font-size:13px;font-weight:700;color:#111;margin-bottom:6px;line-height:1.3}
+.product-colors{display:flex;gap:5px;margin-bottom:8px}
+.color-dot{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.15)}
+.product-price{display:flex;align-items:baseline;gap:8px}
+.price-now{font-size:14px;font-weight:800;color:#111}
+.price-was{font-size:12px;color:#aaa;text-decoration:line-through}
+.price-pct{font-size:11px;font-weight:700;color:#BEA47A}
+
+/* badge */
 .badge{padding:4px 8px;border-radius:var(--radius-sm);font-size:10px;font-weight:700;letter-spacing:.5px}
 .badge-gold{background:var(--black);color:var(--beige)}
 .badge-red{background:#FFE8E8;color:#A8453B}
-.product-info{padding:16px}
-.product-cat{font-size:10px;font-weight:600;letter-spacing:1.5px;color:#999;margin-bottom:4px}
-.product-name{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.3}
-.product-colors{display:flex;gap:6px;margin-bottom:10px}
-.color-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.12)}
-.product-price{display:flex;align-items:baseline;gap:8px}
-.price-now{font-size:15px;font-weight:800}
-.price-was{font-size:12px;color:#999;text-decoration:line-through}
+
+/* ── PRODUCT MODAL ── */
+.product-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.product-modal-overlay.open{display:flex}
+.product-modal{background:#fff;width:90%;max-width:900px;max-height:92vh;border-radius:var(--radius-lg);overflow:hidden;display:grid;grid-template-columns:1fr 1fr;position:relative}
+.product-modal-close{position:absolute;top:14px;right:14px;z-index:10;background:rgba(255,255,255,0.9);border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;backdrop-filter:blur(4px)}
+.pm-images{background:#F0EDE8;overflow:hidden;position:relative}
+.pm-main-img{width:100%;height:100%;object-fit:cover;min-height:400px}
+.pm-thumbs{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.pm-thumb{width:44px;height:44px;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .15s;flex-shrink:0}
+.pm-thumb.active{border-color:var(--black)}
+.pm-thumb img{width:100%;height:100%;object-fit:cover}
+.pm-thumb-nav{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;padding:0 10px;pointer-events:none}
+.pm-nav-btn{width:32px;height:32px;background:rgba(255,255,255,0.85);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;backdrop-filter:blur(4px);transition:background .15s}
+.pm-nav-btn:hover{background:#fff}
+.pm-details{padding:32px 28px;overflow-y:auto;display:flex;flex-direction:column}
+.pm-collection{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--beige);margin-bottom:8px}
+.pm-name{font-size:22px;font-weight:900;color:#111;line-height:1.2;margin-bottom:12px}
+.pm-price-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.pm-price-was{font-size:14px;color:#aaa;text-decoration:line-through}
+.pm-price-now{font-size:20px;font-weight:800;color:#111}
+.pm-pct{font-size:12px;font-weight:700;color:var(--beige)}
+.pm-desc{font-size:13px;color:#666;line-height:1.7;margin-bottom:20px;border-bottom:1px solid rgba(0,0,0,0.08);padding-bottom:20px}
+.pm-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;margin-bottom:10px}
+.pm-colors{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pm-color-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s;position:relative}
+.pm-color-btn.active{border-color:var(--black);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--black)}
+.pm-color-name{font-size:11px;color:#666;margin-left:4px;align-self:center}
+.pm-add-btn{margin-top:auto;background:var(--black);color:#fff;border:none;padding:16px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;letter-spacing:.5px;transition:background .15s;width:100%}
+.pm-add-btn:hover{background:#333}
+.pm-wa-btn{margin-top:8px;background:transparent;color:var(--black);border:1.5px solid var(--beige);padding:12px;border-radius:var(--radius-md);font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;letter-spacing:.5px;transition:all .15s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.pm-wa-btn:hover{background:var(--beige);color:var(--black)}
+@media(max-width:640px){.product-modal{grid-template-columns:1fr;max-height:95vh;overflow-y:auto}.pm-images{min-height:300px}.pm-main-img{min-height:300px}}
+@media(max-width:768px){.products-grid.view-4{grid-template-columns:repeat(2,1fr)}.products-grid{padding:12px 12px 60px}.shop-toolbar{padding:16px 12px 0}}
 
 /* ── FEATURES ── */
 .features-section{background:var(--black)}
@@ -325,16 +381,67 @@ tr:hover td{background:#FAFAF8}
   </div>
 </section>
 
-<!-- PRODUCTS -->
-<section class="section products-section" id="shop">
-  <div class="section-inner">
-    <div class="section-header">
-      <h2 class="section-title">Shop All</h2>
-      <a href="#" class="section-link">View all products</a>
+<!-- PRODUCT MODAL -->
+<div class="product-modal-overlay" id="product-modal-overlay" onclick="closeProductModal(event)">
+  <div class="product-modal" id="product-modal">
+    <button class="product-modal-close" onclick="closeProductModal()">✕</button>
+    <!-- Images -->
+    <div class="pm-images" id="pm-images-wrap">
+      <img class="pm-main-img" id="pm-main-img" src="" alt="">
+      <div class="pm-thumb-nav">
+        <button class="pm-nav-btn" onclick="pmPrev()">‹</button>
+        <button class="pm-nav-btn" onclick="pmNext()">›</button>
+      </div>
+      <div class="pm-thumbs" id="pm-thumbs"></div>
     </div>
-    <div class="products-grid" id="products-grid">
-      <div class="loading">Loading products...</div>
+    <!-- Details -->
+    <div class="pm-details">
+      <p class="pm-collection">CAPZII COLLECTION</p>
+      <h2 class="pm-name" id="pm-name"></h2>
+      <div class="pm-price-row">
+        <span class="pm-price-was" id="pm-price-was"></span>
+        <span class="pm-price-now" id="pm-price-now"></span>
+        <span class="pm-pct" id="pm-pct"></span>
+      </div>
+      <p class="pm-desc" id="pm-desc"></p>
+      <div id="pm-colors-wrap" style="margin-bottom:20px;display:none">
+        <p class="pm-label">COLOR — <span id="pm-color-name" style="color:#111;font-weight:700;letter-spacing:0"></span></p>
+        <div class="pm-colors" id="pm-colors"></div>
+      </div>
+      <button class="pm-add-btn" onclick="pmWhatsApp()">ORDER NOW →</button>
+      <button class="pm-wa-btn" onclick="pmWhatsApp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Order via WhatsApp
+      </button>
     </div>
+  </div>
+</div>
+
+<!-- SHOP SECTION -->
+<section class="products-section" id="shop">
+  <!-- Toolbar -->
+  <div class="shop-toolbar">
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" data-filter="all">ALL</button>
+      <button class="filter-tab" data-filter="new">★ NEW</button>
+      <button class="filter-tab" data-filter="sale">🏷 SALE</button>
+      <button class="filter-tab" data-filter="limited">LIMITED</button>
+    </div>
+    <div class="view-modes">
+      <button class="view-btn" data-view="1" title="Single column">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/></svg>
+      </button>
+      <button class="view-btn active" data-view="2" title="2 columns">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+      </button>
+      <button class="view-btn" data-view="4" title="4 columns">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="9" rx="1"/></svg>
+      </button>
+    </div>
+  </div>
+  <!-- Grid -->
+  <div class="products-grid view-2" id="products-grid">
+    <div class="loading" style="grid-column:1/-1;padding:60px;text-align:center;color:#aaa">Loading products...</div>
   </div>
 </section>
 
@@ -661,10 +768,17 @@ tr:hover td{background:#FAFAF8}
 
           <!-- IMAGES -->
           <div style="margin-top:16px">
-            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">PRODUCT IMAGES (up to 5 URLs)</label>
-            <div id="images-list" style="display:flex;flex-direction:column;gap:8px"></div>
-            <button onclick="addImageRow()" style="margin-top:8px;background:none;border:1px dashed #ccc;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#888;cursor:pointer;width:100%;font-family:'Poppins',sans-serif">+ Add Image URL</button>
-            <p style="font-size:10px;color:#bbb;margin-top:6px">Paste direct image URLs (from Imgur, Cloudinary, etc.)</p>
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">PRODUCT IMAGES (up to 5 — from your device)</label>
+            <div id="img-upload-area" onclick="document.getElementById('img-file-input').click()"
+              style="border:2px dashed #ccc;border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .15s;background:#fafaf8"
+              ondragover="event.preventDefault();this.style.borderColor='#BEA47A'"
+              ondragleave="this.style.borderColor='#ccc'"
+              ondrop="handleImgDrop(event)">
+              <p style="font-size:13px;font-weight:600;color:#aaa">Click to select or drag & drop</p>
+              <p style="font-size:11px;color:#ccc;margin-top:4px">PNG, JPG up to 5 images</p>
+            </div>
+            <input type="file" id="img-file-input" multiple accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleImgFiles(this.files)">
+            <div id="img-preview-wrap" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
           </div>
 
           <div style="margin-top:20px;display:flex;gap:10px">
@@ -1100,25 +1214,80 @@ async function saveShippingSettings() {
   alert('Saved!');
 }
 
+// ── IMAGE UPLOAD (from device) ────────────────────────────
+let selectedFiles = [];
+
+function handleImgFiles(files) {
+  const arr = Array.from(files);
+  const remaining = 5 - selectedFiles.length;
+  arr.slice(0, remaining).forEach(f => {
+    if (selectedFiles.length >= 5) return;
+    selectedFiles.push(f);
+    renderImgPreview(f, selectedFiles.length - 1);
+  });
+}
+
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('img-upload-area').style.borderColor = '#ccc';
+  handleImgFiles(e.dataTransfer.files);
+}
+
+function renderImgPreview(file, idx) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const wrap = document.getElementById('img-preview-wrap');
+    const div = document.createElement('div');
+    div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1.5px solid #ddd';
+    div.dataset.idx = idx;
+    div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="removeImg(${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center">✕</button>`;
+    wrap.appendChild(div);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImg(idx) {
+  selectedFiles.splice(idx, 1);
+  // re-render all previews
+  const wrap = document.getElementById('img-preview-wrap');
+  wrap.innerHTML = '';
+  selectedFiles.forEach((f, i) => renderImgPreview(f, i));
+}
+
+async function uploadImagesToSupabase(productSlug) {
+  const urls = [];
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    const ext = file.name.split('.').pop();
+    const path = `products/${productSlug}/${i}.${ext}`;
+    const { error } = await sb.storage.from('capzii-images').upload(path, file, { upsert: true });
+    if (!error) {
+      const { data } = sb.storage.from('capzii-images').getPublicUrl(path);
+      urls.push({ url: data.publicUrl, isPrimary: i === 0, sortOrder: i });
+    }
+  }
+  return urls;
+}
+
 // ── ADMIN PRODUCTS ────────────────────────────────────────
 let colorCount = 0;
-let imageCount = 0;
 
 function showAddProductForm() {
   document.getElementById('add-product-form').style.display = 'block';
   document.getElementById('add-product-btn').style.display = 'none';
-  // reset
   ['np-name','np-price','np-compare','np-desc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('colors-list').innerHTML = '';
-  document.getElementById('images-list').innerHTML = '';
+  document.getElementById('img-preview-wrap').innerHTML = '';
   document.getElementById('product-save-msg').style.display = 'none';
-  colorCount = 0; imageCount = 0;
-  addColorRow(); addImageRow();
+  selectedFiles = []; colorCount = 0;
+  addColorRow();
 }
 
 function hideAddProductForm() {
   document.getElementById('add-product-form').style.display = 'none';
   document.getElementById('add-product-btn').style.display = 'block';
+  selectedFiles = [];
 }
 
 function addColorRow() {
@@ -1133,17 +1302,6 @@ function addColorRow() {
   document.getElementById('colors-list').appendChild(div);
 }
 
-function addImageRow() {
-  if (imageCount >= 5) return;
-  imageCount++;
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:8px;align-items:center';
-  div.innerHTML = `
-    <input class="settings-input" placeholder="https://i.imgur.com/..." style="flex:1" data-img-url="${imageCount}">
-    <button onclick="this.parentElement.remove();imageCount--" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:4px">✕</button>`;
-  document.getElementById('images-list').appendChild(div);
-}
-
 async function saveProduct() {
   const name = document.getElementById('np-name').value.trim();
   const price = parseFloat(document.getElementById('np-price').value);
@@ -1154,12 +1312,9 @@ async function saveProduct() {
 
   if (!name || !price) {
     msg.textContent = 'Name and price are required.';
-    msg.style.color = '#A8453B';
-    msg.style.display = 'block';
-    return;
+    msg.style.color = '#A8453B'; msg.style.display = 'block'; return;
   }
 
-  // collect colors
   const colors = [];
   document.querySelectorAll('[data-color-name]').forEach(inp => {
     const cname = inp.value.trim();
@@ -1167,40 +1322,32 @@ async function saveProduct() {
     if (cname) colors.push({ name: cname, hex });
   });
 
-  // collect images
-  const images = [];
-  document.querySelectorAll('[data-img-url]').forEach((inp, i) => {
-    const url = inp.value.trim();
-    if (url) images.push({ url, isPrimary: i === 0, sortOrder: i });
-  });
-
-  btn.disabled = true; btn.textContent = 'SAVING...';
+  btn.disabled = true; btn.textContent = 'UPLOADING IMAGES...';
   msg.style.display = 'none';
 
   try {
-    // save to capzii_products table (simple, no Prisma needed)
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-    const { data: product, error } = await sb.from('capzii_products').insert({
+    const images = selectedFiles.length > 0 ? await uploadImagesToSupabase(slug) : [];
+
+    btn.textContent = 'SAVING...';
+    const { error } = await sb.from('capzii_products').insert({
       name, slug, description: desc,
-      base_price: price,
-      compare_price: compare,
+      base_price: price, compare_price: compare,
       status: 'ACTIVE',
       colors: JSON.stringify(colors),
       images: JSON.stringify(images),
       created_at: new Date().toISOString(),
-    }).select().single();
+    });
 
     if (error) throw error;
 
-    msg.textContent = '✓ Product saved successfully!';
-    msg.style.color = '#5C7A5C';
-    msg.style.display = 'block';
+    msg.textContent = '✓ Product saved!';
+    msg.style.color = '#5C7A5C'; msg.style.display = 'block';
     btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
-    setTimeout(() => { hideAddProductForm(); loadAdminProducts(); loadPublicProducts(); }, 1200);
+    setTimeout(() => { hideAddProductForm(); loadAdminProducts(); renderPublicProducts(allProducts); loadPublicProducts(); }, 1000);
   } catch(e) {
-    msg.textContent = 'Error: ' + (e.message || 'Could not save product.');
-    msg.style.color = '#A8453B';
-    msg.style.display = 'block';
+    msg.textContent = 'Error: ' + (e.message || 'Upload failed. Make sure the Supabase bucket "capzii-images" exists and is public.');
+    msg.style.color = '#A8453B'; msg.style.display = 'block';
     btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
   }
 }
@@ -1215,74 +1362,177 @@ async function loadAdminProducts() {
   const wrap = document.getElementById('products-cards');
   if (!wrap) return;
   wrap.innerHTML = '<div class="loading">Loading...</div>';
-  const { data, error } = await sb.from('capzii_products').select('*').order('created_at', {ascending: false});
-  if (error || !data || data.length === 0) {
-    wrap.innerHTML = '<div class="loading">No products yet. Add your first product above.</div>';
-    return;
+  const { data } = await sb.from('capzii_products').select('*').order('created_at', {ascending: false});
+  if (!data || data.length === 0) {
+    wrap.innerHTML = '<div class="loading">No products yet.</div>'; return;
   }
   wrap.innerHTML = data.map(p => {
     const images = JSON.parse(p.images || '[]');
     const colors = JSON.parse(p.colors || '[]');
     const img = images[0]?.url || '';
-    return `
-      <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.07)">
-        <div style="aspect-ratio:1;background:#f7f5f2;overflow:hidden">
-          ${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:contain;padding:12px">` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:32px">🧢</div>'}
+    return `<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.07)">
+      <div style="aspect-ratio:3/4;background:#f0ede8;overflow:hidden">
+        ${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover">` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#ccc">🧢</div>'}
+      </div>
+      <div style="padding:12px">
+        <p style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">${p.name}</p>
+        <p style="font-size:13px;font-weight:800">${Number(p.base_price).toLocaleString()} EGP ${p.compare_price?`<span style="font-size:11px;color:#aaa;text-decoration:line-through">${Number(p.compare_price).toLocaleString()}</span>`:''}</p>
+        ${colors.length?`<div style="display:flex;gap:4px;margin-top:6px">${colors.map(c=>`<div title="${c.name}" style="width:12px;height:12px;border-radius:50%;background:${c.hex};border:1px solid rgba(0,0,0,0.15)"></div>`).join('')}</div>`:''}
+        <div style="display:flex;align-items:center;margin-top:10px">
+          <span style="background:#EEF5EE;color:#3A6B3A;font-size:9px;font-weight:700;padding:3px 8px;border-radius:99px">${p.status}</span>
+          <button onclick="deleteProduct('${p.id}')" style="margin-left:auto;background:none;border:none;color:#ccc;cursor:pointer;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif">DELETE</button>
         </div>
-        <div style="padding:12px">
-          <p style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px;line-height:1.3">${p.name}</p>
-          <p style="font-size:13px;font-weight:800;color:#111">${Number(p.base_price).toLocaleString()} EGP ${p.compare_price ? `<span style="font-size:11px;color:#aaa;font-weight:400;text-decoration:line-through">${Number(p.compare_price).toLocaleString()}</span>` : ''}</p>
-          ${colors.length ? `<div style="display:flex;gap:4px;margin-top:6px">${colors.map(c=>`<div title="${c.name}" style="width:12px;height:12px;border-radius:50%;background:${c.hex};border:1px solid rgba(0,0,0,0.15)"></div>`).join('')}</div>` : ''}
-          <div style="display:flex;gap:6px;margin-top:10px">
-            <span style="background:#EEF5EE;color:#3A6B3A;font-size:9px;font-weight:700;padding:3px 8px;border-radius:99px">${p.status}</span>
-            <button onclick="deleteProduct('${p.id}')" style="margin-left:auto;background:none;border:none;color:#ccc;cursor:pointer;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif">DELETE</button>
-          </div>
-        </div>
-      </div>`;
+      </div>
+    </div>`;
   }).join('');
 }
 
+// ── PUBLIC PRODUCTS ───────────────────────────────────────
+let allProducts = [];
+let activeFilter = 'all';
+
 async function loadPublicProducts() {
+  const { data } = await sb.from('capzii_products')
+    .select('*').eq('status','ACTIVE').order('created_at',{ascending:false}).limit(40);
+  allProducts = data || [];
+  renderPublicProducts(allProducts);
+}
+
+function renderPublicProducts(products) {
   const grid = document.getElementById('products-grid');
-  if (!grid) return;
-  grid.innerHTML = '<div class="loading" style="color:#666;grid-column:1/-1">Loading products...</div>';
+  let filtered = products;
+  if (activeFilter === 'sale') filtered = products.filter(p => p.compare_price && Number(p.compare_price) > Number(p.base_price));
+  else if (activeFilter === 'new') filtered = products.slice(0, 6);
+  else if (activeFilter === 'limited') filtered = products.filter(p => p.is_limited);
 
-  // Load from capzii_products (our simple table)
-  const { data, error } = await sb.from('capzii_products')
-    .select('*').eq('status','ACTIVE').order('created_at',{ascending:false}).limit(8);
-
-  if (error || !data || data.length === 0) {
-    // fallback to Product table from Next.js
-    loadProductsFallback();
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;color:#aaa;font-size:13px">No products found.</div>';
     return;
   }
 
-  grid.innerHTML = data.map(p => {
+  grid.innerHTML = filtered.map(p => {
     const images = JSON.parse(p.images || '[]');
     const colors = JSON.parse(p.colors || '[]');
     const img = images[0]?.url || '';
     const price = Number(p.base_price);
     const compare = p.compare_price ? Number(p.compare_price) : null;
     const discount = compare && compare > price ? Math.round(((compare-price)/compare)*100) : null;
-    return `
-      <div class="product-card">
-        <div class="product-img-wrap">
-          ${img ? `<img src="${img}" alt="${p.name}" loading="lazy">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:40px">🧢</div>'}
-          <div class="product-badges">
-            ${discount ? `<span class="badge badge-red">-${discount}%</span>` : ''}
-          </div>
+    const imgCount = images.length;
+    return `<div class="product-card" onclick='openProductModal(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+      ${discount ? '<span class="product-sale-badge">SALE</span>' : ''}
+      <div class="product-img-wrap">
+        ${img ? `<img src="${img}" alt="${p.name}" loading="lazy">` : '<div class="product-img-placeholder">🧢</div>'}
+      </div>
+      ${imgCount > 1 ? `<span class="product-img-count">0 ${imgCount}</span>` : ''}
+      <div class="product-info">
+        <p class="product-cat">CAPZII</p>
+        <p class="product-name">${p.name}</p>
+        ${colors.length ? `<div class="product-colors">${colors.map(c=>`<div class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`).join('')}</div>` : ''}
+        <div class="product-price">
+          ${compare && compare > price ? `<span class="price-was">${compare.toLocaleString()} EGP</span>` : ''}
+          <span class="price-now">${price.toLocaleString()} EGP</span>
+          ${discount ? `<span class="price-pct">-${discount}%</span>` : ''}
         </div>
-        <div class="product-info">
-          <p class="product-cat">CAPZII</p>
-          <p class="product-name">${p.name}</p>
-          ${colors.length ? `<div class="product-colors">${colors.map(c=>`<div class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`).join('')}</div>` : ''}
-          <div class="product-price">
-            <span class="price-now">${price.toLocaleString()} EGP</span>
-            ${compare && compare > price ? `<span class="price-was">${compare.toLocaleString()} EGP</span>` : ''}
-          </div>
-        </div>
-      </div>`;
+      </div>
+    </div>`;
   }).join('');
+}
+
+// ── FILTER TABS ───────────────────────────────────────────
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderPublicProducts(allProducts);
+  });
+});
+
+// ── VIEW MODE ─────────────────────────────────────────────
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const grid = document.getElementById('products-grid');
+    grid.className = `products-grid view-${btn.dataset.view}`;
+  });
+});
+
+// ── PRODUCT MODAL ─────────────────────────────────────────
+let pmImages = [], pmIdx = 0, pmProduct = null;
+
+function openProductModal(p) {
+  pmProduct = p;
+  pmImages = JSON.parse(typeof p.images === 'string' ? p.images : JSON.stringify(p.images || []));
+  pmIdx = 0;
+  const colors = JSON.parse(typeof p.colors === 'string' ? p.colors : JSON.stringify(p.colors || []));
+  const price = Number(p.base_price);
+  const compare = p.compare_price ? Number(p.compare_price) : null;
+  const discount = compare && compare > price ? Math.round(((compare-price)/compare)*100) : null;
+
+  document.getElementById('pm-name').textContent = p.name;
+  document.getElementById('pm-desc').textContent = p.description || 'Premium Capzii product.';
+  document.getElementById('pm-price-now').textContent = price.toLocaleString() + ' EGP';
+  if (compare && compare > price) {
+    document.getElementById('pm-price-was').textContent = compare.toLocaleString() + ' EGP';
+    document.getElementById('pm-pct').textContent = `-${discount}%`;
+  } else {
+    document.getElementById('pm-price-was').textContent = '';
+    document.getElementById('pm-pct').textContent = '';
+  }
+
+  // colors
+  const cWrap = document.getElementById('pm-colors-wrap');
+  const cList = document.getElementById('pm-colors');
+  if (colors.length) {
+    cWrap.style.display = 'block';
+    cList.innerHTML = colors.map((c, i) => `<button class="pm-color-btn ${i===0?'active':''}" style="background:${c.hex}" title="${c.name}" onclick="selectPmColor(this,'${c.name}')"></button>`).join('');
+    document.getElementById('pm-color-name').textContent = colors[0]?.name || '';
+  } else { cWrap.style.display = 'none'; }
+
+  // images
+  pmRenderImages();
+  document.getElementById('product-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function pmRenderImages() {
+  const main = document.getElementById('pm-main-img');
+  const thumbs = document.getElementById('pm-thumbs');
+  if (pmImages.length) {
+    main.src = pmImages[pmIdx]?.url || pmImages[pmIdx] || '';
+    main.style.display = 'block';
+  } else {
+    main.style.display = 'none';
+  }
+  thumbs.innerHTML = pmImages.map((img, i) => {
+    const url = img?.url || img;
+    return `<div class="pm-thumb ${i===pmIdx?'active':''}" onclick="pmGoTo(${i})"><img src="${url}"></div>`;
+  }).join('');
+}
+
+function pmGoTo(i) { pmIdx = i; pmRenderImages(); }
+function pmPrev() { pmIdx = (pmIdx - 1 + pmImages.length) % pmImages.length; pmRenderImages(); }
+function pmNext() { pmIdx = (pmIdx + 1) % pmImages.length; pmRenderImages(); }
+
+function selectPmColor(btn, name) {
+  document.querySelectorAll('.pm-color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pm-color-name').textContent = name;
+}
+
+function closeProductModal(e) {
+  if (e && e.target !== document.getElementById('product-modal-overlay') && e.type !== 'click') return;
+  if (e && e.target === document.getElementById('product-modal')) return;
+  document.getElementById('product-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pmWhatsApp() {
+  if (!pmProduct) return;
+  const color = document.getElementById('pm-color-name')?.textContent || '';
+  const msg = encodeURIComponent(`Hi Capzii! I'd like to order:\n\n${pmProduct.name}${color?' — '+color:''}\nPrice: ${Number(pmProduct.base_price).toLocaleString()} EGP\n\nPlease confirm availability.`);
+  window.open(`https://wa.me/201224621906?text=${msg}`, '_blank');
 }
 
 // Initial load
