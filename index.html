@@ -727,9 +727,23 @@ header nav a{white-space:nowrap}
         <input class="form-input" id="reset-email" type="email" placeholder="you@email.com">
       </div>
       <p class="error-msg" id="reset-error"></p>
-      <p class="success-msg" id="reset-success">Reset link sent! Check your email.</p>
+      <p class="success-msg" id="reset-success">Reset link sent! Open the email (check spam too) and tap the link.</p>
       <button class="btn-gold" onclick="doReset()">Send Reset Link</button>
       <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:12px;cursor:pointer" onclick="switchAuthTab('signin')">← Back to Sign In</p>
+    </div>
+    <!-- NEW PASSWORD (opened from the email link) -->
+    <div class="auth-form" id="form-newpass">
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input class="form-input" id="newpass-1" type="password" placeholder="Min. 8 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input class="form-input" id="newpass-2" type="password" placeholder="Repeat the password" autocomplete="new-password">
+      </div>
+      <p class="error-msg" id="newpass-error"></p>
+      <p class="success-msg" id="newpass-success">Password updated! You're signed in.</p>
+      <button class="btn-gold" id="newpass-btn" onclick="doNewPassword()">Confirm New Password</button>
     </div>
   </div>
 </div>
@@ -1040,6 +1054,7 @@ let currentUser = null;
 sb.auth.onAuthStateChange((event, session) => {
   currentUser = session?.user || null;
   updateAuthUI();
+  if (event === 'PASSWORD_RECOVERY') setTimeout(openNewPasswordForm, 0);
 });
 
 function updateAuthUI() {
@@ -1082,6 +1097,8 @@ async function signOutUser() {
 function openAuthModal() {
   document.getElementById('auth-modal').classList.add('open');
   switchAuthTab('signin');
+  document.getElementById('auth-modal-title').textContent = 'Welcome';
+  document.getElementById('auth-modal-sub').textContent = 'Sign in or create your Capzii account.';
   setTimeout(() => document.getElementById('signin-email').focus(), 100);
 }
 
@@ -1099,6 +1116,7 @@ function switchAuthTab(tab) {
   document.getElementById('form-' + tab).classList.add('active');
   if (tab === 'signin') document.getElementById('tab-signin-btn').classList.add('active');
   if (tab === 'signup') document.getElementById('tab-signup-btn').classList.add('active');
+  document.querySelector('.auth-modal-tabs').style.display = (tab === 'reset' || tab === 'newpass') ? 'none' : '';
   // hide errors
   document.querySelectorAll('.error-msg,.success-msg').forEach(el => el.style.display = 'none');
 }
@@ -1144,11 +1162,39 @@ async function doReset() {
   if (!email) { err.textContent='Enter your email.'; err.style.display='block'; return; }
   err.style.display='none'; suc.style.display='none';
   const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.href
+    redirectTo: window.location.origin + window.location.pathname
   });
   if (error) { err.textContent=error.message; err.style.display='block'; }
   else { suc.style.display='block'; }
 }
+
+function openNewPasswordForm() {
+  document.getElementById('auth-modal').classList.add('open');
+  switchAuthTab('newpass');
+  document.getElementById('auth-modal-title').textContent = 'Set a new password';
+  document.getElementById('auth-modal-sub').textContent = 'Choose a new password and confirm it.';
+  setTimeout(() => document.getElementById('newpass-1').focus(), 100);
+}
+
+async function doNewPassword() {
+  const p1 = document.getElementById('newpass-1').value;
+  const p2 = document.getElementById('newpass-2').value;
+  const err = document.getElementById('newpass-error');
+  const suc = document.getElementById('newpass-success');
+  const btn = document.getElementById('newpass-btn');
+  err.style.display = 'none'; suc.style.display = 'none';
+  if (p1.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.style.display = 'block'; return; }
+  if (p1 !== p2) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Updating...';
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.textContent = 'Confirm New Password';
+  if (error) { err.textContent = error.message; err.style.display = 'block'; return; }
+  suc.style.display = 'block';
+  document.getElementById('newpass-1').value = ''; document.getElementById('newpass-2').value = '';
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  setTimeout(() => { closeAuthModal(); document.getElementById('auth-modal-title').textContent = 'Welcome'; document.getElementById('auth-modal-sub').textContent = 'Sign in or create your Capzii account.'; }, 1800);
+}
+document.getElementById('newpass-2').addEventListener('keydown', e => { if (e.key === 'Enter') doNewPassword(); });
 
 // ── SECRET ADMIN ENTRY: 5 quick taps on the footer copyright line (no hint, no visual feedback) ──
 let tapCount = 0, tapTimer = null;
