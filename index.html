@@ -429,6 +429,11 @@ header nav a{white-space:nowrap}
 .fp-savebar{position:sticky;bottom:0;display:flex;align-items:center;gap:10px;background:#F7F5F2;padding:14px 0;margin-top:14px;border-top:1px solid rgba(0,0,0,.08)}
 .fp-savebar .settings-save-btn{margin:0}
 .settings-card.wide{grid-column:1/-1}
+.team-perms{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px}
+.team-perms label{display:flex;gap:6px;align-items:center;font-size:12px;color:#444}
+.team-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid rgba(0,0,0,.07);flex-wrap:wrap}
+.team-tag{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:4px;background:#111;color:#BEA47A;margin-left:6px}
+.team-tag.off{background:#eee;color:#999}
 </style>
 </head>
 <body>
@@ -824,6 +829,10 @@ header nav a{white-space:nowrap}
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         Settings
       </button>
+      <button class="admin-nav-item" data-tab="team" style="display:none">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Team Access
+      </button>
       <button class="admin-nav-item" onclick="adminLogout()" style="margin-top:auto;color:#A8453B">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
@@ -959,6 +968,23 @@ header nav a{white-space:nowrap}
           <div id="products-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">
             <div class="loading">Loading products...</div>
           </div>
+        </div>
+      </div>
+
+      <!-- TEAM ACCESS (super admin only) -->
+      <div class="admin-tab" id="tab-team">
+        <div class="admin-page-header"><h1 class="admin-page-title">Team Access</h1><p class="admin-page-sub">SUPER ADMIN ONLY</p></div>
+        <div class="settings-grid">
+          <div class="settings-card wide">
+            <p class="settings-card-title">Add or update an admin</p>
+            <p class="settings-card-sub">The person must first create a normal account on the site, then add their email here.</p>
+            <label class="fp-label">Email</label>
+            <input class="settings-input" id="team-email" type="email" placeholder="admin@email.com">
+            <label class="fp-label">Can access</label>
+            <div class="team-perms" id="team-perms"></div>
+            <div class="fp-row"><button class="fp-btn" onclick="teamSave()">Save admin</button><span class="fp-hint" id="team-msg"></span></div>
+          </div>
+          <div class="settings-card wide"><p class="settings-card-title">Admins</p><div id="team-list"></div></div>
         </div>
       </div>
 
@@ -1196,6 +1222,42 @@ async function doNewPassword() {
 }
 document.getElementById('newpass-2').addEventListener('keydown', e => { if (e.key === 'Enter') doNewPassword(); });
 
+// ── TEAM ACCESS (super admin) ──
+const PERM_LABELS = { orders:'Orders', customers:'Customers', products:'Products', frontpage:'Front Page', settings:'Settings' };
+let TEAM = [];
+gid('team-perms').innerHTML = Object.entries(PERM_LABELS).map(([k,l]) => `<label><input type="checkbox" data-perm="${k}"> ${l}</label>`).join('');
+async function loadTeam() {
+  const { data, error } = await sb.rpc('admin_list');
+  if (error) { gid('team-list').textContent = error.message; return; }
+  TEAM = data || [];
+  gid('team-list').innerHTML = TEAM.map((a, i) => {
+    const sup = a.role === 'SUPER_ADMIN';
+    const perms = sup ? 'Full access' : (Object.keys(PERM_LABELS).filter(k => a.perms && a.perms[k]).map(k => PERM_LABELS[k]).join(', ') || 'No access');
+    return `<div class="team-row"><div><b style="font-size:13px">${esc(a.email)}</b><span class="team-tag${a.active ? '' : ' off'}">${sup ? 'SUPER ADMIN' : (a.active ? 'ACTIVE' : 'DISABLED')}</span><p class="fp-hint">${esc(perms)}</p></div>
+      ${sup ? '' : `<div class="fp-row" style="margin:0"><button class="fp-btn ghost" onclick="teamEdit(${i})">Edit</button><button class="fp-btn ghost" onclick="teamToggle(${i})">${a.active ? 'Disable' : 'Enable'}</button><button class="fp-btn" onclick="teamRemove(${i})">Remove</button></div>`}</div>`;
+  }).join('') || '<p class="fp-hint">No admins yet.</p>';
+}
+function teamPerms() { const o = {}; document.querySelectorAll('#team-perms [data-perm]').forEach(c => o[c.dataset.perm] = c.checked); return o; }
+function teamMsg(t, ok) { const m = gid('team-msg'); m.style.color = ok ? '#5C7A5C' : '#A8453B'; m.textContent = t; }
+async function teamSave(email, perms, active) {
+  email = typeof email === 'string' ? email : gid('team-email').value.trim().toLowerCase();
+  if (!email) { teamMsg('Enter an email.', false); return; }
+  const { error } = await sb.rpc('admin_upsert', { p_email: email, p_perms: perms || teamPerms(), p_active: active === undefined ? true : active });
+  if (error) { teamMsg(error.message, false); return; }
+  teamMsg('Saved.', true); gid('team-email').value = ''; document.querySelectorAll('#team-perms input').forEach(c => c.checked = false); loadTeam();
+}
+function teamEdit(i) {
+  const a = TEAM[i]; gid('team-email').value = a.email;
+  document.querySelectorAll('#team-perms [data-perm]').forEach(c => c.checked = !!(a.perms && a.perms[c.dataset.perm]));
+  gid('team-email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function teamToggle(i) { const a = TEAM[i]; teamSave(a.email, a.perms, !a.active); }
+async function teamRemove(i) {
+  if (!confirm('Remove ' + TEAM[i].email + ' from admins?')) return;
+  const { error } = await sb.rpc('admin_remove', { p_user_id: TEAM[i].user_id });
+  if (error) teamMsg(error.message, false); else loadTeam();
+}
+
 // ── SECRET ADMIN ENTRY: 5 quick taps on the footer copyright line (no hint, no visual feedback) ──
 let tapCount = 0, tapTimer = null;
 const secretTap = document.getElementById('footer-copy');
@@ -1208,12 +1270,18 @@ secretTap.addEventListener('click', () => {
   else tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
 });
 
-function isAdmin(user) {
-  // app_metadata is set server-side only — user cannot modify it
-  const appMeta = user?.app_metadata || {};
-  const userMeta = user?.user_metadata || {};
-  const role = (appMeta.role || userMeta.role || '').toUpperCase();
-  return role === 'SUPER_ADMIN' || role === 'ADMIN';
+let ADMIN_ACCESS = null;
+async function isAdmin() {
+  const { data, error } = await sb.rpc('my_admin_access');
+  ADMIN_ACCESS = (!error && data) ? data : null;
+  return !!ADMIN_ACCESS;
+}
+const hasPerm = k => ADMIN_ACCESS && (ADMIN_ACCESS.role === 'SUPER_ADMIN' || (ADMIN_ACCESS.perms || {})[k] === true);
+function applyAdminAccess() {
+  document.querySelectorAll('.admin-nav-item[data-tab]').forEach(b => {
+    const t = b.dataset.tab;
+    b.style.display = t === 'overview' ? '' : t === 'team' ? (ADMIN_ACCESS?.role === 'SUPER_ADMIN' ? '' : 'none') : (hasPerm(t) ? '' : 'none');
+  });
 }
 
 async function checkAdminSession() {
@@ -1221,7 +1289,7 @@ async function checkAdminSession() {
   if (session) {
     // Always fetch fresh user data from server to get latest app_metadata
     const { data: { user } } = await sb.auth.getUser();
-    if (isAdmin(user)) {
+    if (await isAdmin(user)) {
       openAdminPanel(user);
     } else {
       showAdminDenied();
@@ -1269,7 +1337,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   } else {
     // getUser() fetches fresh data from server including app_metadata
     const { data: { user } } = await sb.auth.getUser();
-    if (!isAdmin(user)) {
+    if (!(await isAdmin(user))) {
       await sb.auth.signOut();
       err.textContent = 'Access denied. This account is not authorized as admin.';
       err.style.display = 'block';
@@ -1288,9 +1356,11 @@ function openAdminPanel(user) {
   const initials = (user.user_metadata?.full_name || user.email || 'A').charAt(0).toUpperCase();
   document.getElementById('admin-avatar').textContent = initials;
   document.getElementById('admin-user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
+  applyAdminAccess();
   loadAdminData();
-  loadAdminProducts();
-  loadFrontPageAdmin();
+  if (hasPerm('products')) loadAdminProducts();
+  if (hasPerm('frontpage')) loadFrontPageAdmin();
+  if (ADMIN_ACCESS.role === 'SUPER_ADMIN') loadTeam();
 }
 
 document.getElementById('admin-close').onclick = () =>
