@@ -1261,9 +1261,10 @@ async function teamRemove(i) {
 // ── SECRET ADMIN ENTRY: 5 quick taps on the footer copyright line (no hint, no visual feedback) ──
 let tapCount = 0, tapTimer = null;
 const secretTap = document.getElementById('footer-copy');
-secretTap.style.userSelect = 'none';
-secretTap.style.webkitTapHighlightColor = 'transparent';
+secretTap.style.cssText += ';user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:default';
+['mousedown', 'selectstart', 'dblclick', 'contextmenu'].forEach(ev => secretTap.addEventListener(ev, e => e.preventDefault()));
 secretTap.addEventListener('click', () => {
+  window.getSelection()?.removeAllRanges();
   tapCount++;
   clearTimeout(tapTimer);
   if (tapCount >= 5) { tapCount = 0; checkAdminSession(); }
