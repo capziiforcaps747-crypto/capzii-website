@@ -1227,7 +1227,7 @@ document.getElementById('newpass-2').addEventListener('keydown', e => { if (e.ke
 // ── TEAM ACCESS (super admin) ──
 const PERM_LABELS = { orders:'Orders', customers:'Customers', products:'Products', frontpage:'Front Page', settings:'Settings' };
 let TEAM = [];
-gid('team-perms').innerHTML = Object.entries(PERM_LABELS).map(([k,l]) => `<label><input type="checkbox" data-perm="${k}"> ${l}</label>`).join('');
+document.getElementById('team-perms').innerHTML = Object.entries(PERM_LABELS).map(([k,l]) => `<label><input type="checkbox" data-perm="${k}"> ${l}</label>`).join('');
 async function loadTeam() {
   const { data, error } = await sb.rpc('admin_list');
   if (error) { gid('team-list').textContent = error.message; return; }
