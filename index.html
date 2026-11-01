@@ -436,6 +436,10 @@ header nav a{white-space:nowrap}
 .team-tag.off{background:#eee;color:#999}
 #footer-copy,#footer-copy *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #footer-copy::selection,#footer-copy *::selection{background:transparent!important;color:inherit!important}
+.color-dot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.2);padding:0;cursor:pointer;transition:transform .12s}
+.color-dot:hover{transform:scale(1.15)}
+.color-dot.active{box-shadow:0 0 0 2px #fff,0 0 0 3px #111}
+.product-colors{gap:8px}
 </style>
 </head>
 <body>
@@ -913,7 +917,7 @@ header nav a{white-space:nowrap}
         <!-- ADD PRODUCT FORM -->
         <div id="add-product-form" style="display:none;background:#fff;border-radius:12px;padding:28px;border:1px solid rgba(0,0,0,0.07);margin-bottom:24px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-            <p style="font-size:14px;font-weight:800;color:#111">New Product</p>
+            <p id="form-title" style="font-size:14px;font-weight:800;color:#111">New Product</p>
             <button onclick="hideAddProductForm()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
           </div>
 
@@ -934,18 +938,22 @@ header nav a{white-space:nowrap}
               <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">DESCRIPTION</label>
               <textarea class="settings-input" id="np-desc" rows="3" placeholder="Premium 100% cotton twill cap..." style="resize:vertical"></textarea>
             </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">STATUS</label>
+              <select class="settings-input" id="np-status"><option value="ACTIVE">Active (visible on site)</option><option value="DRAFT">Hidden</option></select>
+            </div>
           </div>
 
           <!-- COLORS -->
           <div style="margin-top:16px">
-            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">COLORS (up to 6)</label>
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">COLORS (up to 6 — pick which photo each color shows)</label>
             <div id="colors-list" style="display:flex;flex-direction:column;gap:8px"></div>
             <button onclick="addColorRow()" style="margin-top:8px;background:none;border:1px dashed #ccc;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#888;cursor:pointer;width:100%;font-family:'Poppins',sans-serif">+ Add Color</button>
           </div>
 
           <!-- IMAGES -->
           <div style="margin-top:16px">
-            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">PRODUCT IMAGES (up to 5 — from your device)</label>
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">PRODUCT IMAGES (up to 5 — from your device · ★ makes a photo the main one)</label>
             <div id="img-upload-area" onclick="document.getElementById('img-file-input').click()"
               style="border:2px dashed #ccc;border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .15s;background:#fafaf8"
               ondragover="event.preventDefault();this.style.borderColor='#BEA47A'"
@@ -1508,92 +1516,86 @@ async function saveShippingSettings() {
   alert('Saved!');
 }
 
-// ── IMAGE UPLOAD (from device) ────────────────────────────
-let selectedFiles = [];
+// ── PRODUCT FORM (add + edit) ─────────────────────────────
+const MAX_IMGS = 5;
+let formImgs = [], imgSeq = 0, editingId = null, ADMIN_PRODUCTS = {};
 
-function handleImgFiles(files) {
-  const arr = Array.from(files);
-  const remaining = 5 - selectedFiles.length;
-  arr.slice(0, remaining).forEach(f => {
-    if (selectedFiles.length >= 5) return;
-    selectedFiles.push(f);
-    renderImgPreview(f, selectedFiles.length - 1);
-  });
+function renderFormImgs() {
+  document.getElementById('img-preview-wrap').innerHTML = formImgs.map((im, i) => `<div style="position:relative;width:78px;height:78px;border-radius:8px;overflow:hidden;border:2px solid ${i===0?'#BEA47A':'#ddd'}">
+    <img src="${esc(im.preview)}" style="width:100%;height:100%;object-fit:cover">
+    <button type="button" onclick="removeImg(${i})" title="Remove" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px">✕</button>
+    ${i === 0 ? '<span style="position:absolute;bottom:0;left:0;right:0;background:#BEA47A;color:#111;font-size:8px;font-weight:800;text-align:center;padding:2px">MAIN</span>' : `<button type="button" onclick="makeMainImg(${i})" title="Make main" style="position:absolute;bottom:2px;left:2px;background:rgba(255,255,255,.9);border:none;border-radius:4px;font-size:10px;cursor:pointer;padding:1px 5px">★</button>`}
+  </div>`).join('');
+  refreshColorImgSelects();
 }
-
+function handleImgFiles(files) {
+  Array.from(files).forEach(f => {
+    if (formImgs.length >= MAX_IMGS) return;
+    if (!/^image\/(png|jpe?g|webp)$/.test(f.type) || f.size > 8 * 1024 * 1024) return;
+    formImgs.push({ id: ++imgSeq, file: f, preview: URL.createObjectURL(f) });
+  });
+  document.getElementById('img-file-input').value = '';
+  renderFormImgs();
+}
 function handleImgDrop(e) {
   e.preventDefault();
   document.getElementById('img-upload-area').style.borderColor = '#ccc';
   handleImgFiles(e.dataTransfer.files);
 }
+function removeImg(i) { formImgs.splice(i, 1); renderFormImgs(); }
+function makeMainImg(i) { formImgs.unshift(formImgs.splice(i, 1)[0]); renderFormImgs(); }
 
-function renderImgPreview(file, idx) {
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const wrap = document.getElementById('img-preview-wrap');
-    const div = document.createElement('div');
-    div.style.cssText = 'position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1.5px solid #ddd';
-    div.dataset.idx = idx;
-    div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">
-      <button onclick="removeImg(${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center">✕</button>`;
-    wrap.appendChild(div);
-  };
-  reader.readAsDataURL(file);
+function refreshColorImgSelects() {
+  document.querySelectorAll('[data-color-img]').forEach(sel => {
+    const want = sel.dataset.want !== undefined ? sel.dataset.want : sel.value;
+    delete sel.dataset.want;
+    sel.innerHTML = '<option value="">Photo: automatic</option>' + formImgs.map((im, i) => `<option value="${im.id}">Photo ${i + 1}${i === 0 ? ' (main)' : ''}</option>`).join('');
+    sel.value = formImgs.some(im => String(im.id) === String(want)) ? want : '';
+  });
+}
+function addColorRow(c) {
+  c = c || {};
+  if (document.querySelectorAll('#colors-list > div').length >= 6) return;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  div.innerHTML = `
+    <input class="settings-input" placeholder="Color name (e.g. Navy)" style="flex:2;min-width:120px" data-color-name value="${esc(c.name || '')}">
+    <input type="color" value="${esc(c.hex || '#111111')}" data-color-hex style="width:40px;height:36px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:2px">
+    <select class="settings-input" data-color-img data-want="${c.imgId || ''}" style="flex:1;min-width:130px" title="Which photo shows when this color is picked"></select>
+    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:4px">✕</button>`;
+  document.getElementById('colors-list').appendChild(div);
+  refreshColorImgSelects();
 }
 
-function removeImg(idx) {
-  selectedFiles.splice(idx, 1);
-  // re-render all previews
-  const wrap = document.getElementById('img-preview-wrap');
-  wrap.innerHTML = '';
-  selectedFiles.forEach((f, i) => renderImgPreview(f, i));
-}
-
-async function uploadImagesToSupabase(productSlug) {
-  const urls = [];
-  for (let i = 0; i < selectedFiles.length; i++) {
-    const file = selectedFiles[i];
-    const ext = file.name.split('.').pop();
-    const path = `products/${productSlug}/${i}.${ext}`;
-    const { error } = await sb.storage.from('capzii-images').upload(path, file, { upsert: true });
-    if (!error) {
-      const { data } = sb.storage.from('capzii-images').getPublicUrl(path);
-      urls.push({ url: data.publicUrl, isPrimary: i === 0, sortOrder: i });
-    }
-  }
-  return urls;
-}
-
-// ── ADMIN PRODUCTS ────────────────────────────────────────
-let colorCount = 0;
-
-function showAddProductForm() {
+function openProductForm(id) {
+  editingId = id || null;
+  const p = id ? ADMIN_PRODUCTS[id] : null;
   document.getElementById('add-product-form').style.display = 'block';
   document.getElementById('add-product-btn').style.display = 'none';
-  ['np-name','np-price','np-compare','np-desc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('colors-list').innerHTML = '';
-  document.getElementById('img-preview-wrap').innerHTML = '';
+  document.getElementById('form-title').textContent = p ? 'Edit Product' : 'New Product';
+  document.getElementById('save-product-btn').textContent = p ? 'SAVE CHANGES' : 'SAVE PRODUCT';
+  document.getElementById('np-name').value = p ? p.name : '';
+  document.getElementById('np-price').value = p ? p.base_price : '';
+  document.getElementById('np-compare').value = p && p.compare_price ? p.compare_price : '';
+  document.getElementById('np-desc').value = p ? (p.description || '') : '';
+  document.getElementById('np-status').value = p && p.status !== 'ACTIVE' ? 'DRAFT' : 'ACTIVE';
   document.getElementById('product-save-msg').style.display = 'none';
-  selectedFiles = []; colorCount = 0;
-  addColorRow();
+  document.getElementById('colors-list').innerHTML = '';
+  formImgs = [];
+  if (p) {
+    JSON.parse(p.images || '[]').forEach(im => formImgs.push({ id: ++imgSeq, url: im.url, preview: im.url }));
+    const cols = JSON.parse(p.colors || '[]');
+    cols.forEach(c => { const m = formImgs.find(x => x.url === c.image); addColorRow({ name: c.name, hex: c.hex, imgId: m ? m.id : '' }); });
+    if (!cols.length) addColorRow();
+  } else addColorRow();
+  renderFormImgs();
+  document.getElementById('add-product-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
+function showAddProductForm() { openProductForm(); }
 function hideAddProductForm() {
   document.getElementById('add-product-form').style.display = 'none';
   document.getElementById('add-product-btn').style.display = 'block';
-  selectedFiles = [];
-}
-
-function addColorRow() {
-  if (colorCount >= 6) return;
-  colorCount++;
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:8px;align-items:center';
-  div.innerHTML = `
-    <input class="settings-input" placeholder="Color name (e.g. Navy)" style="flex:2" data-color-name="${colorCount}">
-    <input type="color" value="#111111" data-color-hex="${colorCount}" style="width:40px;height:36px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:2px">
-    <button onclick="this.parentElement.remove();colorCount--" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:4px">✕</button>`;
-  document.getElementById('colors-list').appendChild(div);
+  formImgs = []; editingId = null;
 }
 
 async function saveProduct() {
@@ -1601,48 +1603,42 @@ async function saveProduct() {
   const price = parseFloat(document.getElementById('np-price').value);
   const compare = parseFloat(document.getElementById('np-compare').value) || null;
   const desc = document.getElementById('np-desc').value.trim();
+  const status = document.getElementById('np-status').value;
   const msg = document.getElementById('product-save-msg');
   const btn = document.getElementById('save-product-btn');
-
-  if (!name || !price) {
-    msg.textContent = 'Name and price are required.';
-    msg.style.color = '#A8453B'; msg.style.display = 'block'; return;
-  }
-
-  const colors = [];
-  document.querySelectorAll('[data-color-name]').forEach(inp => {
-    const cname = inp.value.trim();
-    const hex = document.querySelector(`[data-color-hex="${inp.dataset.colorName}"]`)?.value || '#111111';
-    if (cname) colors.push({ name: cname, hex });
-  });
-
-  btn.disabled = true; btn.textContent = 'UPLOADING IMAGES...';
-  msg.style.display = 'none';
-
+  const label = editingId ? 'SAVE CHANGES' : 'SAVE PRODUCT';
+  if (!name || !price) { msg.textContent = 'Name and price are required.'; msg.style.color = '#A8453B'; msg.style.display = 'block'; return; }
+  const rows = [...document.querySelectorAll('#colors-list > div')].map(r => ({
+    name: r.querySelector('[data-color-name]').value.trim(),
+    hex: r.querySelector('[data-color-hex]').value,
+    imgId: r.querySelector('[data-color-img]').value,
+  })).filter(r => r.name);
+  btn.disabled = true; btn.textContent = 'UPLOADING IMAGES...'; msg.style.display = 'none';
   try {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-    const images = selectedFiles.length > 0 ? await uploadImagesToSupabase(slug) : [];
-
+    const slug = editingId ? ADMIN_PRODUCTS[editingId].slug : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
+    for (const im of formImgs) {
+      if (!im.file || im.url) continue;
+      const ext = (im.file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const path = `products/${slug}/${Date.now()}-${im.id}.${ext}`;
+      const { error } = await sb.storage.from('capzii-images').upload(path, im.file, { contentType: im.file.type });
+      if (error) throw error;
+      im.url = sb.storage.from('capzii-images').getPublicUrl(path).data.publicUrl;
+    }
+    const images = formImgs.map((im, i) => ({ url: im.url, isPrimary: i === 0, sortOrder: i }));
+    const colors = rows.map(r => { const im = formImgs.find(x => String(x.id) === String(r.imgId)); return im ? { name: r.name, hex: r.hex, image: im.url } : { name: r.name, hex: r.hex }; });
     btn.textContent = 'SAVING...';
-    const { error } = await sb.from('capzii_products').insert({
-      name, slug, description: desc,
-      base_price: price, compare_price: compare,
-      status: 'ACTIVE',
-      colors: JSON.stringify(colors),
-      images: JSON.stringify(images),
-      created_at: new Date().toISOString(),
-    });
-
+    const payload = { name, description: desc, base_price: price, compare_price: compare, status, colors: JSON.stringify(colors), images: JSON.stringify(images) };
+    const { error } = editingId
+      ? await sb.from('capzii_products').update(payload).eq('id', editingId)
+      : await sb.from('capzii_products').insert({ ...payload, slug, created_at: new Date().toISOString() });
     if (error) throw error;
-
-    msg.textContent = '✓ Product saved!';
-    msg.style.color = '#5C7A5C'; msg.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
-    setTimeout(() => { hideAddProductForm(); loadAdminProducts(); renderPublicProducts(allProducts); loadPublicProducts(); }, 1000);
-  } catch(e) {
-    msg.textContent = 'Error: ' + (e.message || 'Upload failed. Make sure the Supabase bucket "capzii-images" exists and is public.');
+    msg.textContent = '✓ Saved!'; msg.style.color = '#5C7A5C'; msg.style.display = 'block';
+    btn.disabled = false; btn.textContent = label;
+    setTimeout(() => { hideAddProductForm(); loadAdminProducts(); loadPublicProducts(); }, 900);
+  } catch (e) {
+    msg.textContent = 'Error: ' + (e.message || 'Upload failed. Check the capzii-images bucket and your permissions.');
     msg.style.color = '#A8453B'; msg.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'SAVE PRODUCT';
+    btn.disabled = false; btn.textContent = label;
   }
 }
 
@@ -1660,6 +1656,7 @@ async function loadAdminProducts() {
   if (!data || data.length === 0) {
     wrap.innerHTML = '<div class="loading">No products yet.</div>'; return;
   }
+  ADMIN_PRODUCTS = {}; data.forEach(p => ADMIN_PRODUCTS[p.id] = p);
   wrap.innerHTML = data.map(p => {
     const images = JSON.parse(p.images || '[]');
     const colors = JSON.parse(p.colors || '[]');
@@ -1674,7 +1671,8 @@ async function loadAdminProducts() {
         ${colors.length?`<div style="display:flex;gap:4px;margin-top:6px">${colors.map(c=>`<div title="${c.name}" style="width:12px;height:12px;border-radius:50%;background:${c.hex};border:1px solid rgba(0,0,0,0.15)"></div>`).join('')}</div>`:''}
         <div style="display:flex;align-items:center;margin-top:10px">
           <span style="background:#EEF5EE;color:#3A6B3A;font-size:9px;font-weight:700;padding:3px 8px;border-radius:99px">${p.status}</span>
-          <button onclick="deleteProduct('${p.id}')" style="margin-left:auto;background:none;border:none;color:#ccc;cursor:pointer;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif">DELETE</button>
+          <button onclick="openProductForm('${p.id}')" style="margin-left:auto;background:none;border:none;color:#111;cursor:pointer;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif">EDIT</button>
+          <button onclick="deleteProduct('${p.id}')" style="margin-left:12px;background:none;border:none;color:#ccc;cursor:pointer;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif">DELETE</button>
         </div>
       </div>
     </div>`;
@@ -1707,12 +1705,12 @@ function renderPublicProducts(products) {
   grid.innerHTML = filtered.map(p => {
     const images = JSON.parse(p.images || '[]');
     const colors = JSON.parse(p.colors || '[]');
-    const img = images[0]?.url || '';
+    const img = (colors[0] && colors[0].image) || images[0]?.url || '';
     const price = Number(p.base_price);
     const compare = p.compare_price ? Number(p.compare_price) : null;
     const discount = compare && compare > price ? Math.round(((compare-price)/compare)*100) : null;
     const imgCount = images.length;
-    return `<div class="product-card" onclick='openProductModal(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+    return `<div class="product-card" onclick='openProductModal(${JSON.stringify(p).replace(/'/g,"&#39;")}, +this.dataset.ci || 0)' data-ci="0">
       ${discount ? `<span class="product-sale-badge">${discount}% OFF</span>` : ''}
       <div class="product-img-wrap">
         ${promoTagHTML()}
@@ -1722,7 +1720,7 @@ function renderPublicProducts(products) {
       <div class="product-info">
         <p class="product-cat">CAPZII</p>
         <p class="product-name">${esc(p.name)}</p>
-        ${colors.length ? `<div class="product-colors">${colors.map(c=>`<div class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`).join('')}</div>` : ''}
+        ${colors.length ? `<div class="product-colors">${colors.map((c,ci)=>`<button type="button" class="color-dot${ci===0?' active':''}" data-ci="${ci}" data-img="${esc(c.image||'')}" style="background:${esc(c.hex)}" title="${esc(c.name)}" aria-label="${esc(c.name)}" onclick="cardColor(event,this)"></button>`).join('')}</div>` : ''}
         <div class="product-price">
           ${compare && compare > price ? `<span class="price-was">${compare.toLocaleString()} EGP</span>` : ''}
           <span class="price-now">${price.toLocaleString()} EGP</span>
@@ -1731,6 +1729,18 @@ function renderPublicProducts(products) {
       </div>
     </div>`;
   }).join('');
+}
+
+function cardColor(e, btn) {
+  e.stopPropagation();
+  const card = btn.closest('.product-card');
+  card.dataset.ci = btn.dataset.ci;
+  card.querySelectorAll('.color-dot').forEach(b => b.classList.toggle('active', b === btn));
+  const url = btn.dataset.img; if (!url) return;
+  const wrap = card.querySelector('.product-img-wrap');
+  let im = wrap.querySelector('img');
+  if (!im) { const ph = wrap.querySelector('.product-img-placeholder'); if (ph) ph.remove(); im = document.createElement('img'); wrap.appendChild(im); }
+  im.src = url;
 }
 
 // ── FILTER TABS ───────────────────────────────────────────
@@ -1754,10 +1764,12 @@ document.querySelectorAll('.view-btn').forEach(btn => {
 });
 
 // ── PRODUCT MODAL ─────────────────────────────────────────
-let pmImages = [], pmIdx = 0, pmProduct = null;
+let pmImages = [], pmIdx = 0, pmProduct = null, pmCi = 0;
+const pmColors = () => JSON.parse(typeof pmProduct.colors === 'string' ? pmProduct.colors : JSON.stringify(pmProduct.colors || '[]'));
+const pmImgIndex = c => c && c.image ? pmImages.findIndex(im => (im.url || im) === c.image) : -1;
 
-function openProductModal(p) {
-  pmProduct = p;
+function openProductModal(p, ci) {
+  pmProduct = p; pmCi = ci || 0;
   pmImages = JSON.parse(typeof p.images === 'string' ? p.images : JSON.stringify(p.images || []));
   pmIdx = 0;
   const colors = JSON.parse(typeof p.colors === 'string' ? p.colors : JSON.stringify(p.colors || []));
@@ -1781,8 +1793,10 @@ function openProductModal(p) {
   const cList = document.getElementById('pm-colors');
   if (colors.length) {
     cWrap.style.display = 'block';
-    cList.innerHTML = colors.map((c, i) => `<button class="pm-color-btn ${i===0?'active':''}" style="background:${c.hex}" title="${c.name}" onclick="selectPmColor(this,'${c.name}')"></button>`).join('');
-    document.getElementById('pm-color-name').textContent = colors[0]?.name || '';
+    if (!colors[pmCi]) pmCi = 0;
+    cList.innerHTML = colors.map((c, i) => `<button class="pm-color-btn ${i===pmCi?'active':''}" style="background:${esc(c.hex)}" title="${esc(c.name)}" aria-label="${esc(c.name)}" onclick="selectPmColor(${i})"></button>`).join('');
+    document.getElementById('pm-color-name').textContent = colors[pmCi].name || '';
+    const j = pmImgIndex(colors[pmCi]); if (j >= 0) pmIdx = j;
   } else { cWrap.style.display = 'none'; }
 
   // images
@@ -1810,10 +1824,12 @@ function pmGoTo(i) { pmIdx = i; pmRenderImages(); }
 function pmPrev() { pmIdx = (pmIdx - 1 + pmImages.length) % pmImages.length; pmRenderImages(); }
 function pmNext() { pmIdx = (pmIdx + 1) % pmImages.length; pmRenderImages(); }
 
-function selectPmColor(btn, name) {
-  document.querySelectorAll('.pm-color-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('pm-color-name').textContent = name;
+function selectPmColor(i) {
+  const c = pmColors()[i]; if (!c) return;
+  pmCi = i;
+  document.querySelectorAll('.pm-color-btn').forEach((b, k) => b.classList.toggle('active', k === i));
+  document.getElementById('pm-color-name').textContent = c.name;
+  const j = pmImgIndex(c); if (j >= 0) { pmIdx = j; pmRenderImages(); }
 }
 
 function closeProductModal(e) {
@@ -1861,7 +1877,7 @@ function pmAddToCart() {
   const key = p.id + '|' + color;
   const existing = cart.find(i => i.key === key);
   if (existing) existing.qty += 1;
-  else cart.push({ key, id: p.id, name: p.name, color, price: Number(p.base_price), image: images[0]?.url || '', qty: 1 });
+  else cart.push({ key, id: p.id, name: p.name, color, price: Number(p.base_price), image: (pmColors()[pmCi] && pmColors()[pmCi].image) || images[0]?.url || '', qty: 1 });
   saveCart();
   closeProductModal();
   openCart();
