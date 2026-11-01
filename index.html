@@ -440,6 +440,7 @@ header nav a{white-space:nowrap}
 .color-dot:hover{transform:scale(1.15)}
 .color-dot.active{box-shadow:0 0 0 2px #fff,0 0 0 3px #111}
 .product-colors{gap:8px}
+.co-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 </style>
 </head>
 <body>
@@ -518,9 +519,15 @@ header nav a{white-space:nowrap}
 
       <div class="co-field"><label>FULL NAME *</label><input id="co-name" type="text" autocomplete="name" placeholder="Your full name"></div>
       <div class="co-field"><label>PHONE (WHATSAPP) *</label><input id="co-phone" type="tel" autocomplete="tel" placeholder="01XXXXXXXXX" inputmode="numeric"></div>
-      <div class="co-field"><label>GOVERNORATE *</label><select id="co-gov"><option value="">Select governorate</option></select></div>
-      <div class="co-field"><label>FULL ADDRESS *</label><textarea id="co-address" rows="2" autocomplete="street-address" placeholder="Street, building, floor, apartment"></textarea></div>
-      <div class="co-field"><label>NOTES (OPTIONAL)</label><input id="co-notes" type="text" placeholder="Delivery notes, landmark..."></div>
+      <div class="co-field"><label>GOVERNORATE *</label><select id="co-gov" autocomplete="address-level1"><option value="">Select governorate</option></select></div>
+      <div class="co-field"><label>CITY / AREA *</label><input id="co-city" type="text" autocomplete="address-level2" placeholder="e.g. Nasr City, 6th of October"></div>
+      <div class="co-field"><label>STREET *</label><input id="co-street" type="text" autocomplete="address-line1" placeholder="Street name"></div>
+      <div class="co-row3">
+        <div class="co-field"><label>BUILDING *</label><input id="co-building" type="text" placeholder="12"></div>
+        <div class="co-field"><label>FLOOR</label><input id="co-floor" type="text" placeholder="3"></div>
+        <div class="co-field"><label>APARTMENT *</label><input id="co-apt" type="text" placeholder="8"></div>
+      </div>
+      <div class="co-field"><label>ADDITIONAL DETAILS (OPTIONAL)</label><input id="co-notes" type="text" placeholder="Landmark, delivery notes, anything we should know"></div>
       <input class="co-hp" id="co-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <div class="co-summary" id="co-summary"></div>
@@ -1050,19 +1057,16 @@ header nav a{white-space:nowrap}
             </div>
             <button class="settings-save-btn" onclick="saveWhatsappSettings()">SAVE</button>
           </div>
-          <div class="settings-card">
+          <div class="settings-card wide">
             <p class="settings-card-title">Shipping</p>
-            <p class="settings-card-sub">Shown on product & checkout pages</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
-              <div>
-                <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">COST (EGP)</label>
-                <input class="settings-input" id="settings-shipping-cost" placeholder="50" value="50">
-              </div>
-              <div>
-                <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:4px">DURATION</label>
-                <input class="settings-input" id="settings-shipping-days" placeholder="5-7" value="5-7">
-              </div>
+            <p class="settings-card-sub">Default price, free-shipping amount, and a custom price for any governorate</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:4px">
+              <div><label class="fp-label" style="margin-top:0">DEFAULT PRICE (EGP)</label><input class="settings-input" id="settings-shipping-cost" placeholder="50" value="50"></div>
+              <div><label class="fp-label" style="margin-top:0">FREE SHIPPING OVER (EGP)</label><input class="settings-input" id="settings-free-at" placeholder="500 (0 = off)" value="500"></div>
+              <div><label class="fp-label" style="margin-top:0">DURATION</label><input class="settings-input" id="settings-shipping-days" placeholder="5-7" value="5-7"></div>
             </div>
+            <label class="fp-label">Price per governorate (empty = default price)</label>
+            <div id="ship-gov-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:6px"></div>
             <button class="settings-save-btn" onclick="saveShippingSettings()">SAVE</button>
           </div>
           <div class="settings-card">
@@ -1492,6 +1496,9 @@ async function loadAdminData() {
     if (settingsMap['whatsapp_number']) document.getElementById('settings-whatsapp-number').value = settingsMap['whatsapp_number'];
     if (settingsMap['shipping_cost']) document.getElementById('settings-shipping-cost').value = settingsMap['shipping_cost'];
     if (settingsMap['shipping_days']) document.getElementById('settings-shipping-days').value = settingsMap['shipping_days'];
+    if (settingsMap['free_shipping_at'] !== undefined) document.getElementById('settings-free-at').value = settingsMap['free_shipping_at'];
+    let rates = {}; try { rates = JSON.parse(settingsMap['shipping_rates'] || '{}') || {}; } catch (e) {}
+    renderShipGrid(rates);
 
   } catch(e) { console.error('Admin data error:', e); }
 }
@@ -1506,14 +1513,20 @@ async function saveWhatsappSettings() {
   await sb.from('site_settings').upsert({key:'whatsapp_number',value:num},{onConflict:'key'});
   alert('Saved!');
 }
+function renderShipGrid(rates) {
+  document.getElementById('ship-gov-grid').innerHTML = GOVERNORATES.map(n => `<div style="display:flex;align-items:center;gap:6px;background:#faf9f7;border-radius:8px;padding:6px 8px"><span style="font-size:11px;font-weight:600;flex:1">${esc(n)}</span><input class="settings-input" data-gov="${esc(n)}" type="number" min="0" placeholder="—" value="${rates[n] !== undefined ? rates[n] : ''}" style="width:72px;padding:6px 8px;margin:0"></div>`).join('');
+}
 async function saveShippingSettings() {
-  const cost = document.getElementById('settings-shipping-cost').value;
-  const days = document.getElementById('settings-shipping-days').value;
-  await Promise.all([
-    sb.from('site_settings').upsert({key:'shipping_cost',value:cost},{onConflict:'key'}),
-    sb.from('site_settings').upsert({key:'shipping_days',value:days},{onConflict:'key'}),
-  ]);
-  alert('Saved!');
+  const rates = {};
+  document.querySelectorAll('#ship-gov-grid [data-gov]').forEach(i => { if (i.value !== '' && Number(i.value) >= 0) rates[i.dataset.gov] = Number(i.value); });
+  const rows = [
+    { key: 'shipping_cost', value: document.getElementById('settings-shipping-cost').value || '50' },
+    { key: 'shipping_days', value: document.getElementById('settings-shipping-days').value },
+    { key: 'free_shipping_at', value: document.getElementById('settings-free-at').value || '0' },
+    { key: 'shipping_rates', value: JSON.stringify(rates) },
+  ];
+  const { error } = await sb.from('site_settings').upsert(rows, { onConflict: 'key' });
+  alert(error ? 'Not saved: ' + error.message : 'Saved!');
 }
 
 // ── PRODUCT FORM (add + edit) ─────────────────────────────
@@ -1853,7 +1866,8 @@ function esc(s) {
 
 // ── CART ──────────────────────────────────────────────────
 const CART_KEY = 'capzii_cart_v1';
-const FREE_SHIPPING_AT = 500;
+let FREE_SHIPPING_AT = 500;
+let shippingRates = {};
 let shippingFee = 50;
 let shippingDays = '5-7';
 let cart = [];
@@ -1865,7 +1879,12 @@ function saveCart() {
 }
 
 function cartSubtotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
-function cartShipping() { return cart.length === 0 || cartSubtotal() >= FREE_SHIPPING_AT ? 0 : shippingFee; }
+function shippingFor(gov) {
+  if (!cart.length || (FREE_SHIPPING_AT > 0 && cartSubtotal() >= FREE_SHIPPING_AT)) return 0;
+  const r = shippingRates[gov];
+  return (r !== undefined && r !== '' && isFinite(Number(r))) ? Number(r) : shippingFee;
+}
+function cartShipping() { return shippingFor(''); }
 function cartCount() { return cart.reduce((s, i) => s + i.qty, 0); }
 function money(n) { return Number(n).toLocaleString() + ' EGP'; }
 
@@ -1923,7 +1942,7 @@ function renderCart() {
   // free-shipping progress (nudges bigger baskets)
   const sub = cartSubtotal();
   const remaining = FREE_SHIPPING_AT - sub;
-  bar.style.display = 'block';
+  bar.style.display = FREE_SHIPPING_AT > 0 ? 'block' : 'none';
   bar.innerHTML = remaining > 0
     ? `<p class="cart-ship-text">Add <b>${money(remaining)}</b> more for free shipping</p><div class="cart-ship-track"><div class="cart-ship-fill" style="width:${Math.min(100, sub / FREE_SHIPPING_AT * 100)}%"></div></div>`
     : `<p class="cart-ship-text" style="margin:0">🎉 You've unlocked <b>free shipping</b></p>`;
@@ -1949,7 +1968,7 @@ function renderCart() {
   const ship = cartShipping();
   foot.innerHTML = `
     <div class="cart-line"><span>Subtotal</span><span>${money(sub)}</span></div>
-    <div class="cart-line"><span>Shipping</span><span>${ship === 0 ? 'Free' : money(ship)}</span></div>
+    <div class="cart-line"><span>Shipping · set at checkout</span><span>${ship === 0 ? 'Free' : money(ship)}</span></div>
     <div class="cart-line total"><span>Total</span><span>${money(sub + ship)}</span></div>
     <button class="cart-checkout-btn" onclick="openCheckout()">CHECKOUT · CASH ON DELIVERY</button>
     <p class="cart-cod-note">Pay in cash when your order arrives</p>`;
@@ -1958,6 +1977,16 @@ function renderCart() {
 // ── CHECKOUT (Cash on Delivery) ───────────────────────────
 const GOVERNORATES = ['Cairo','Giza','Alexandria','Qalyubia','Sharqia','Dakahlia','Gharbia','Monufia','Beheira','Kafr El Sheikh','Damietta','Port Said','Ismailia','Suez','North Sinai','South Sinai','Red Sea','Fayoum','Beni Suef','Minya','Assiut','Sohag','Qena','Luxor','Aswan','New Valley','Matrouh'];
 document.getElementById('co-gov').innerHTML += GOVERNORATES.map(g => `<option>${g}</option>`).join('');
+
+function refreshCheckoutSummary() {
+  const gov = document.getElementById('co-gov').value;
+  const sub = cartSubtotal(), ship = shippingFor(gov);
+  document.getElementById('co-summary').innerHTML = `
+    <div class="cart-line"><span>${cartCount()} item${cartCount() > 1 ? 's' : ''}</span><span>${money(sub)}</span></div>
+    <div class="cart-line"><span>Shipping${gov ? ' · ' + esc(gov) : ''}</span><span>${ship === 0 ? 'Free' : money(ship)}</span></div>
+    <div class="cart-line total" style="margin-bottom:0"><span>Total to pay on delivery</span><span>${money(sub + ship)}</span></div>`;
+}
+document.getElementById('co-gov').addEventListener('change', refreshCheckoutSummary);
 
 function openCheckout() {
   if (!cart.length) return;
@@ -1969,11 +1998,7 @@ function openCheckout() {
     const nameEl = document.getElementById('co-name');
     if (!nameEl.value) nameEl.value = currentUser.user_metadata?.full_name || '';
   }
-  const sub = cartSubtotal(), ship = cartShipping();
-  document.getElementById('co-summary').innerHTML = `
-    <div class="cart-line"><span>${cartCount()} item${cartCount() > 1 ? 's' : ''}</span><span>${money(sub)}</span></div>
-    <div class="cart-line"><span>Shipping</span><span>${ship === 0 ? 'Free' : money(ship)}</span></div>
-    <div class="cart-line total" style="margin-bottom:0"><span>Total to pay on delivery</span><span>${money(sub + ship)}</span></div>`;
+  refreshCheckoutSummary();
   document.getElementById('co-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1997,23 +2022,31 @@ async function submitOrder() {
   const name = document.getElementById('co-name').value.trim();
   const phone = normalizePhone(document.getElementById('co-phone').value);
   const gov = document.getElementById('co-gov').value;
-  const address = document.getElementById('co-address').value.trim();
+  const city = document.getElementById('co-city').value.trim();
+  const street = document.getElementById('co-street').value.trim();
+  const building = document.getElementById('co-building').value.trim();
+  const floor = document.getElementById('co-floor').value.trim();
+  const apt = document.getElementById('co-apt').value.trim();
   const notes = document.getElementById('co-notes').value.trim();
 
   if (name.length < 2) return fail('Please enter your full name.');
   if (!phone) return fail('Please enter a valid Egyptian mobile number (e.g. 01012345678).');
   if (!gov) return fail('Please select your governorate.');
-  if (address.length < 8) return fail('Please enter your full address.');
+  if (city.length < 2) return fail('Please enter your city or area.');
+  if (street.length < 2) return fail('Please enter your street name.');
+  if (!building) return fail('Please enter your building number.');
+  if (!apt) return fail('Please enter your apartment number.');
+  const address = ['Apt ' + apt, floor ? 'Floor ' + floor : '', 'Bldg ' + building, street, city, gov].filter(Boolean).join(', ');
   if (!cart.length) return fail('Your bag is empty.');
 
   // honeypot: bots fill the hidden field — pretend success, save nothing
   if (document.getElementById('co-website').value) { showOrderSuccess('CPZ-000000'); return; }
 
-  const subtotal = cartSubtotal(), shipping = cartShipping();
+  const subtotal = cartSubtotal(), shipping = shippingFor(gov);
   const orderNumber = 'CPZ-' + Date.now().toString(36).toUpperCase().slice(-5) + Math.random().toString(36).slice(2, 5).toUpperCase();
 
   btn.disabled = true; btn.textContent = 'PLACING ORDER...';
-  const { error } = await sb.from('capzii_orders').insert({
+  const base = {
     order_number: orderNumber,
     customer_name: name,
     phone, governorate: gov, address,
@@ -2022,7 +2055,10 @@ async function submitOrder() {
     subtotal, shipping, total: subtotal + shipping,
     status: 'PENDING',
     user_id: currentUser?.id || null,
-  });
+  };
+  let { error } = await sb.from('capzii_orders').insert({ ...base, city, street, building, floor: floor || null, apartment: apt });
+  // if the new address columns are not in the database yet, still save the order with the full address text
+  if (error && /column|schema cache/i.test(error.message || '')) ({ error } = await sb.from('capzii_orders').insert(base));
   btn.disabled = false; btn.textContent = 'PLACE ORDER →';
 
   if (error) { console.error(error); return fail('Could not place your order. Please try again or order via WhatsApp.'); }
@@ -2040,8 +2076,11 @@ function showOrderSuccess(orderNumber) {
 // pull shipping settings from the dashboard (falls back to defaults if not readable)
 async function loadShopSettings() {
   try {
-    const { data } = await sb.from('site_settings').select('key,value').in('key', ['shipping_cost', 'shipping_days']);
+    const { data } = await sb.from('site_settings').select('key,value')
+      .in('key', ['shipping_cost', 'shipping_days', 'free_shipping_at', 'shipping_rates']);
     (data || []).forEach(s => {
+      if (s.key === 'free_shipping_at' && s.value !== '' && !isNaN(Number(s.value))) FREE_SHIPPING_AT = Number(s.value);
+      if (s.key === 'shipping_rates') { try { shippingRates = JSON.parse(s.value || '{}') || {}; } catch (e) {} }
       if (s.key === 'shipping_cost' && !isNaN(Number(s.value))) shippingFee = Number(s.value);
       if (s.key === 'shipping_days' && s.value) shippingDays = s.value;
     });
