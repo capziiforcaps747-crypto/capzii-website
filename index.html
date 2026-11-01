@@ -441,6 +441,7 @@ header nav a{white-space:nowrap}
 .color-dot.active{box-shadow:0 0 0 2px #fff,0 0 0 3px #111}
 .product-colors{gap:8px}
 .co-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.filter-tab{text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -589,10 +590,7 @@ header nav a{white-space:nowrap}
   <!-- Toolbar -->
   <div class="shop-toolbar">
     <div class="filter-tabs" id="filter-tabs">
-      <button class="filter-tab active" data-filter="all">ALL</button>
-      <button class="filter-tab" data-filter="new">★ NEW</button>
-      <button class="filter-tab" data-filter="sale">🏷 SALE</button>
-      <button class="filter-tab" data-filter="limited">LIMITED</button>
+      \1
     </div>
     <div class="view-modes">
       <button class="view-btn" data-view="1" title="Single column">
@@ -640,7 +638,7 @@ header nav a{white-space:nowrap}
       <p class="drops-label" data-cms="drops_label">LIMITED DROPS</p>
       <h2 class="drops-title" data-cms="drops_title">Built. Not Branded.</h2>
       <p class="drops-body" data-cms="drops_body">Each drop is a limited run. When it's gone, it's gone. No restocks. No compromises. Just construction, proportion, and restraint — done right, every time.</p>
-      <a href="#shop" class="btn-primary" style="display:inline-flex">See All Drops →</a>
+      <a href="#shop" onclick="showCollection('limited')" class="btn-primary" style="display:inline-flex">See All Drops →</a>
     </div>
     <div class="drops-visual">
       <span class="drops-visual-text">CAPZII</span>
@@ -669,9 +667,9 @@ header nav a{white-space:nowrap}
       </div>
       <div class="footer-col">
         <h4>SHOP</h4>
-        <a href="#shop">All Products</a>
-        <a href="#shop">New Arrivals</a>
-        <a href="#drops">Limited Drops</a>
+        <a href="#shop" onclick="showCollection('all')">All Products</a>
+        <a href="#shop" onclick="showCollection('new')">New Arrivals</a>
+        <a href="#shop" onclick="showCollection('limited')">Limited Drops</a>
       </div>
       <div class="footer-col">
         <h4>HELP</h4>
@@ -921,6 +919,14 @@ header nav a{white-space:nowrap}
           <button class="settings-save-btn" onclick="showAddProductForm()" id="add-product-btn">+ ADD NEW PRODUCT</button>
         </div>
 
+        <button class="fp-btn ghost" style="margin-bottom:16px" onclick="toggleCollections()">⚙ MANAGE COLLECTIONS</button>
+        <div id="collections-panel" style="display:none;background:#fff;border-radius:12px;padding:24px;border:1px solid rgba(0,0,0,0.07);margin-bottom:24px">
+          <p style="font-size:14px;font-weight:800;color:#111">Collections</p>
+          <p class="fp-hint">These become the filter tabs above the products on the site. A product can be in several (or none). Empty collections stay hidden.</p>
+          <div id="collections-list"></div>
+          <div class="fp-row"><button class="fp-btn ghost" onclick="colAdd()">+ Add collection</button><button class="fp-btn" onclick="colSave()">Save collections</button><span class="fp-hint" id="col-msg"></span></div>
+        </div>
+
         <!-- ADD PRODUCT FORM -->
         <div id="add-product-form" style="display:none;background:#fff;border-radius:12px;padding:28px;border:1px solid rgba(0,0,0,0.07);margin-bottom:24px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -956,6 +962,12 @@ header nav a{white-space:nowrap}
             <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">COLORS (up to 6 — pick which photo each color shows)</label>
             <div id="colors-list" style="display:flex;flex-direction:column;gap:8px"></div>
             <button onclick="addColorRow()" style="margin-top:8px;background:none;border:1px dashed #ccc;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#888;cursor:pointer;width:100%;font-family:'Poppins',sans-serif">+ Add Color</button>
+          </div>
+
+          <!-- COLLECTIONS -->
+          <div style="margin-top:16px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#aaa;display:block;margin-bottom:8px">COLLECTIONS (optional — where this product appears on the site)</label>
+            <div class="team-perms" id="np-collections"></div>
           </div>
 
           <!-- IMAGES -->
@@ -1529,6 +1541,36 @@ async function saveShippingSettings() {
   alert(error ? 'Not saved: ' + error.message : 'Saved!');
 }
 
+// ── COLLECTIONS MANAGER ──
+let COL_EDIT = [];
+function colRender() {
+  document.getElementById('collections-list').innerHTML = COL_EDIT.map((c, i) => `<div class="team-row"><input class="settings-input" data-col-label="${i}" value="${esc(c.label)}" style="flex:1;margin:0"><button type="button" class="fp-btn ghost" onclick="colDel(${i})">✕</button></div>`).join('') || '<p class="fp-hint">No collections.</p>';
+}
+function colSync() { document.querySelectorAll('[data-col-label]').forEach(inp => { COL_EDIT[+inp.dataset.colLabel].label = inp.value; }); }
+function toggleCollections() {
+  const pn = document.getElementById('collections-panel');
+  pn.style.display = pn.style.display === 'none' ? 'block' : 'none';
+  if (pn.style.display === 'block') { COL_EDIT = COLLECTIONS.map(c => ({ ...c })); colRender(); }
+}
+function colAdd() { colSync(); COL_EDIT.push({ id: '', label: 'New collection' }); colRender(); }
+function colDel(i) { colSync(); if (confirm('Remove this collection? Products stay, they just leave it.')) { COL_EDIT.splice(i, 1); colRender(); } }
+async function colSave() {
+  colSync();
+  const used = new Set(), list = [];
+  COL_EDIT.forEach(c => {
+    const label = c.label.trim(); if (!label) return;
+    let id = c.id || label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'c' + Date.now();
+    while (used.has(id)) id += '-2';
+    used.add(id); list.push({ id, label });
+  });
+  const m = document.getElementById('col-msg'); m.style.color = '#999'; m.textContent = 'Saving…';
+  const { error } = await sb.from('site_settings').upsert({ key: 'collections', value: JSON.stringify(list) }, { onConflict: 'key' });
+  if (error) { m.style.color = '#A8453B'; m.textContent = 'Not saved: ' + error.message; return; }
+  COLLECTIONS = list; COL_EDIT = list.map(c => ({ ...c })); colRender();
+  m.style.color = '#5C7A5C'; m.textContent = 'Saved.';
+  renderPublicProducts(allProducts); loadAdminProducts();
+}
+
 // ── PRODUCT FORM (add + edit) ─────────────────────────────
 const MAX_IMGS = 5;
 let formImgs = [], imgSeq = 0, editingId = null, ADMIN_PRODUCTS = {};
@@ -1580,6 +1622,9 @@ function addColorRow(c) {
   refreshColorImgSelects();
 }
 
+function renderCollectionChecks(sel) {
+  document.getElementById('np-collections').innerHTML = COLLECTIONS.map(c => `<label><input type="checkbox" data-col="${esc(c.id)}" ${sel.includes(c.id) ? 'checked' : ''}> ${esc(c.label)}</label>`).join('') || '<span class="fp-hint">No collections yet — create them with the Collections button.</span>';
+}
 function openProductForm(id) {
   editingId = id || null;
   const p = id ? ADMIN_PRODUCTS[id] : null;
@@ -1602,6 +1647,7 @@ function openProductForm(id) {
     if (!cols.length) addColorRow();
   } else addColorRow();
   renderFormImgs();
+  renderCollectionChecks(p ? prodCols(p) : []);
   document.getElementById('add-product-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function showAddProductForm() { openProductForm(); }
@@ -1640,12 +1686,17 @@ async function saveProduct() {
     const images = formImgs.map((im, i) => ({ url: im.url, isPrimary: i === 0, sortOrder: i }));
     const colors = rows.map(r => { const im = formImgs.find(x => String(x.id) === String(r.imgId)); return im ? { name: r.name, hex: r.hex, image: im.url } : { name: r.name, hex: r.hex }; });
     btn.textContent = 'SAVING...';
-    const payload = { name, description: desc, base_price: price, compare_price: compare, status, colors: JSON.stringify(colors), images: JSON.stringify(images) };
-    const { error } = editingId
-      ? await sb.from('capzii_products').update(payload).eq('id', editingId)
-      : await sb.from('capzii_products').insert({ ...payload, slug, created_at: new Date().toISOString() });
+    const payload = { name, description: desc, base_price: price, compare_price: compare, status, colors: JSON.stringify(colors), images: JSON.stringify(images),
+      collections: JSON.stringify([...document.querySelectorAll('#np-collections [data-col]:checked')].map(c => c.dataset.col)) };
+    const run = pl => editingId
+      ? sb.from('capzii_products').update(pl).eq('id', editingId)
+      : sb.from('capzii_products').insert({ ...pl, slug, created_at: new Date().toISOString() });
+    let { error } = await run(payload), note = '';
+    if (error && /collections|column|schema cache/i.test(error.message || '')) {
+      const { collections, ...rest } = payload; ({ error } = await run(rest)); note = ' (collections not saved — run capzii_collections.sql first)';
+    }
     if (error) throw error;
-    msg.textContent = '✓ Saved!'; msg.style.color = '#5C7A5C'; msg.style.display = 'block';
+    msg.textContent = '✓ Saved!' + note; msg.style.color = '#5C7A5C'; msg.style.display = 'block';
     btn.disabled = false; btn.textContent = label;
     setTimeout(() => { hideAddProductForm(); loadAdminProducts(); loadPublicProducts(); }, 900);
   } catch (e) {
@@ -1682,6 +1733,7 @@ async function loadAdminProducts() {
         <p style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">${p.name}</p>
         <p style="font-size:13px;font-weight:800">${Number(p.base_price).toLocaleString()} EGP ${p.compare_price?`<span style="font-size:11px;color:#aaa;text-decoration:line-through">${Number(p.compare_price).toLocaleString()}</span>`:''}</p>
         ${colors.length?`<div style="display:flex;gap:4px;margin-top:6px">${colors.map(c=>`<div title="${c.name}" style="width:12px;height:12px;border-radius:50%;background:${c.hex};border:1px solid rgba(0,0,0,0.15)"></div>`).join('')}</div>`:''}
+        ${(() => { const cs = prodCols(p).map(id => (COLLECTIONS.find(c => c.id === id) || {}).label).filter(Boolean); return cs.length ? `<p style="font-size:10px;color:#8C6D3A;margin-top:6px">${esc(cs.join(' · '))}</p>` : ''; })()}
         <div style="display:flex;align-items:center;margin-top:10px">
           <span style="background:#EEF5EE;color:#3A6B3A;font-size:9px;font-weight:700;padding:3px 8px;border-radius:99px">${p.status}</span>
           <button onclick="openProductForm('${p.id}')" style="margin-left:auto;background:none;border:none;color:#111;cursor:pointer;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif">EDIT</button>
@@ -1706,9 +1758,8 @@ async function loadPublicProducts() {
 function renderPublicProducts(products) {
   const grid = document.getElementById('products-grid');
   let filtered = products;
-  if (activeFilter === 'sale') filtered = products.filter(p => p.compare_price && Number(p.compare_price) > Number(p.base_price));
-  else if (activeFilter === 'new') filtered = products.slice(0, 6);
-  else if (activeFilter === 'limited') filtered = products.filter(p => p.is_limited);
+  renderFilterTabs();
+  if (activeFilter !== 'all') filtered = products.filter(p => prodCols(p).includes(activeFilter));
 
   if (!filtered.length) {
     grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;color:#aaa;font-size:13px">No products found.</div>';
@@ -1744,6 +1795,22 @@ function renderPublicProducts(products) {
   }).join('');
 }
 
+// ── COLLECTIONS (New Arrivals, Sale, Limited Drops, …) ──
+const DEFAULT_COLLECTIONS = [{ id: 'new', label: 'New Arrivals' }, { id: 'sale', label: 'Sale' }, { id: 'limited', label: 'Limited Drops' }];
+let COLLECTIONS = DEFAULT_COLLECTIONS.slice();
+function prodCols(p) {
+  try { const v = typeof p.collections === 'string' ? JSON.parse(p.collections || '[]') : (p.collections || []); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+}
+function renderFilterTabs() {
+  const used = new Set(); allProducts.forEach(p => prodCols(p).forEach(c => used.add(c)));
+  const tabs = [{ id: 'all', label: 'All' }].concat(COLLECTIONS.filter(c => used.has(c.id)));
+  if (!tabs.some(t => t.id === activeFilter)) activeFilter = 'all';
+  const el = document.getElementById('filter-tabs');
+  el.style.display = tabs.length > 1 ? '' : 'none';
+  el.innerHTML = tabs.map(t => `<button class="filter-tab${t.id === activeFilter ? ' active' : ''}" data-filter="${esc(t.id)}">${esc(t.label)}</button>`).join('');
+}
+function showCollection(id) { activeFilter = id; renderPublicProducts(allProducts); }
+
 function cardColor(e, btn) {
   e.stopPropagation();
   const card = btn.closest('.product-card');
@@ -1757,13 +1824,10 @@ function cardColor(e, btn) {
 }
 
 // ── FILTER TABS ───────────────────────────────────────────
-document.querySelectorAll('.filter-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
-    renderPublicProducts(allProducts);
-  });
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const b = e.target.closest('.filter-tab'); if (!b) return;
+  activeFilter = b.dataset.filter;
+  renderPublicProducts(allProducts);
 });
 
 // ── VIEW MODE ─────────────────────────────────────────────
@@ -2141,6 +2205,8 @@ async function loadSiteContent() {
     if (error) throw error;
     const m = {}; (data || []).forEach(r => m[r.key] = r.value == null ? '' : r.value);
     applySiteContent(m);
+    try { const c = JSON.parse(m.collections || 'null'); if (Array.isArray(c) && c.length) COLLECTIONS = c.filter(x => x && x.id && x.label); } catch (e) {}
+    if (allProducts.length) renderPublicProducts(allProducts);
     document.querySelector(`.view-btn[data-view="${fpGet('shop_default_view')}"]`)?.click();
   } catch (e) { console.warn('site content', e); }
 }
