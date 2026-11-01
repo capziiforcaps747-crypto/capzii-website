@@ -533,6 +533,7 @@ header nav a{white-space:nowrap}
 
       <div class="co-summary" id="co-summary"></div>
       <p class="co-error" id="co-error"></p>
+      <div class="co-field" id="co-pay-wrap"><label>PAYMENT METHOD</label><div id="co-pay-options"></div></div>
       <button class="co-submit" id="co-submit" onclick="submitOrder()">PLACE ORDER →</button>
       <p style="font-size:11px;color:#999;text-align:center;margin-top:12px">Pay in cash when your order arrives. We'll confirm by WhatsApp or phone.</p>
     </div>
@@ -1101,6 +1102,14 @@ header nav a{white-space:nowrap}
             </div>
             <button class="settings-save-btn" onclick="saveWhatsappSettings()">SAVE</button>
           </div>
+          <div class="settings-card">
+            <p class="settings-card-title">Payment methods</p>
+            <p class="settings-card-sub">What customers can choose at checkout</p>
+            <div class="toggle-row"><div class="toggle-label">Cash on delivery</div><input type="checkbox" id="pay-cod" checked></div>
+            <div class="toggle-row"><div class="toggle-label">Card (Visa / Mastercard)</div><input type="checkbox" id="pay-card"></div>
+            <p class="fp-hint">Turn on Card only after the Paymob setup is finished.</p>
+            <button class="settings-save-btn" onclick="savePaymentSettings()">SAVE</button>
+          </div>
           <div class="settings-card wide">
             <p class="settings-card-title">Shipping</p>
             <p class="settings-card-sub">Default price, free-shipping amount, and a custom price for any governorate</p>
@@ -1538,7 +1547,7 @@ function fmtOrderRow(o) {
   const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-GB') : '—';
   const items = (o.items || []).map(i => `${esc(i.name)}${i.color ? ' (' + esc(i.color) + ')' : ''} ×${Number(i.qty) || 1}`).join('<br>');
   return `<tr>
-    <td style="font-weight:700;font-size:11px">${esc(o.order_number)}</td>
+    <td style="font-weight:700;font-size:11px">${esc(o.order_number)}${o.payment_method === 'CARD' ? `<br><span style="font-size:9px;font-weight:700;color:${o.payment_status === 'PAID' ? '#3A6B3A' : '#8C6D3A'}">CARD · ${esc(o.payment_status || 'PENDING')}</span>` : ''}</td>
     <td>
       <div style="font-weight:600">${esc(o.customer_name)}</div>
       <div style="color:#888;font-size:11px">${esc(o.phone)} · ${esc(o.governorate || '')}</div>
@@ -1568,7 +1577,7 @@ async function loadAdminData() {
 
     // KPIs (cancelled orders don't count as revenue)
     const allOrders = orders.data||[];
-    const revenue = allOrders.filter(o=>o.status!=='CANCELLED').reduce((s,o)=>s+Number(o.total||0),0);
+    const revenue = allOrders.filter(o=>o.status!=='CANCELLED' && !(o.payment_method==='CARD' && o.payment_status!=='PAID')).reduce((s,o)=>s+Number(o.total||0),0);
     const activeProducts = (products.data||[]).filter(p=>p.status==='ACTIVE').length;
     const custCount = customers.count || (customers.data||[]).length;
 
@@ -1621,6 +1630,8 @@ async function loadAdminData() {
     if (settingsMap['free_shipping_at'] !== undefined) document.getElementById('settings-free-at').value = settingsMap['free_shipping_at'];
     let rates = {}; try { rates = JSON.parse(settingsMap['shipping_rates'] || '{}') || {}; } catch (e) {}
     renderShipGrid(rates);
+    document.getElementById('pay-cod').checked = settingsMap['payment_cod_enabled'] !== 'false';
+    document.getElementById('pay-card').checked = settingsMap['payment_card_enabled'] === 'true';
 
   } catch(e) { console.error('Admin data error:', e); }
 }
@@ -1634,6 +1645,12 @@ async function saveWhatsappSettings() {
   const num = document.getElementById('settings-whatsapp-number').value.replace(/\D/g,'');
   await sb.from('site_settings').upsert({key:'whatsapp_number',value:num},{onConflict:'key'});
   alert('Saved!');
+}
+async function savePaymentSettings() {
+  const cod = document.getElementById('pay-cod').checked, card = document.getElementById('pay-card').checked;
+  if (!cod && !card) { alert('Keep at least one payment method on.'); return; }
+  const { error } = await sb.from('site_settings').upsert([{ key: 'payment_cod_enabled', value: String(cod) }, { key: 'payment_card_enabled', value: String(card) }], { onConflict: 'key' });
+  alert(error ? 'Not saved: ' + error.message : 'Saved!');
 }
 function renderShipGrid(rates) {
   document.getElementById('ship-gov-grid').innerHTML = GOVERNORATES.map(n => `<div style="display:flex;align-items:center;gap:6px;background:#faf9f7;border-radius:8px;padding:6px 8px"><span style="font-size:11px;font-weight:600;flex:1">${esc(n)}</span><input class="settings-input" data-gov="${esc(n)}" type="number" min="0" placeholder="—" value="${rates[n] !== undefined ? rates[n] : ''}" style="width:72px;padding:6px 8px;margin:0"></div>`).join('');
@@ -2152,17 +2169,32 @@ function renderCart() {
 const GOVERNORATES = ['Cairo','Giza','Alexandria','Qalyubia','Sharqia','Dakahlia','Gharbia','Monufia','Beheira','Kafr El Sheikh','Damietta','Port Said','Ismailia','Suez','North Sinai','South Sinai','Red Sea','Fayoum','Beni Suef','Minya','Assiut','Sohag','Qena','Luxor','Aswan','New Valley','Matrouh'];
 document.getElementById('co-gov').innerHTML += GOVERNORATES.map(g => `<option>${g}</option>`).join('');
 
+let PAY_COD = true, PAY_CARD = false, payMethod = 'COD';
+const payLabel = () => payMethod === 'CARD' ? 'PAY NOW →' : 'PLACE ORDER →';
+function renderPayMethods() {
+  const opts = [];
+  if (PAY_COD || !PAY_CARD) opts.push(['COD', 'Cash on delivery', 'Pay when your order arrives']);
+  if (PAY_CARD) opts.push(['CARD', 'Card — Visa / Mastercard', 'Secure online payment']);
+  if (!opts.some(o => o[0] === payMethod)) payMethod = opts[0][0];
+  document.getElementById('co-pay-wrap').style.display = opts.length > 1 ? '' : 'none';
+  document.getElementById('co-pay-options').innerHTML = opts.map(([v, t, sub]) => `<label style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1.5px solid ${v === payMethod ? '#111' : '#e5e5e5'};border-radius:10px;margin-bottom:8px;cursor:pointer"><input type="radio" name="co-pay" value="${v}" ${v === payMethod ? 'checked' : ''} style="margin-top:3px"><span><b style="font-size:13px">${t}</b><br><span style="font-size:11px;color:#888">${sub}</span></span></label>`).join('');
+  const b = document.getElementById('co-submit'); if (!b.disabled) b.textContent = payLabel();
+  refreshCheckoutSummary();
+}
+document.getElementById('co-pay-options').addEventListener('change', e => { payMethod = e.target.value; renderPayMethods(); });
+
 function refreshCheckoutSummary() {
   const gov = document.getElementById('co-gov').value;
   const sub = cartSubtotal(), ship = shippingFor(gov);
   document.getElementById('co-summary').innerHTML = `
     <div class="cart-line"><span>${cartCount()} item${cartCount() > 1 ? 's' : ''}</span><span>${money(sub)}</span></div>
     <div class="cart-line"><span>Shipping${gov ? ' · ' + esc(gov) : ''}</span><span>${ship === 0 ? 'Free' : money(ship)}</span></div>
-    <div class="cart-line total" style="margin-bottom:0"><span>Total to pay on delivery</span><span>${money(sub + ship)}</span></div>`;
+    <div class="cart-line total" style="margin-bottom:0"><span>${payMethod === 'CARD' ? 'Total to pay now' : 'Total to pay on delivery'}</span><span>${money(sub + ship)}</span></div>`;
 }
 document.getElementById('co-gov').addEventListener('change', refreshCheckoutSummary);
 
 function openCheckout() {
+  setTimeout(renderPayMethods, 0);
   if (!cart.length) return;
   closeCart();
   document.getElementById('co-form-view').style.display = 'block';
@@ -2230,14 +2262,37 @@ async function submitOrder() {
     status: 'PENDING',
     user_id: currentUser?.id || null,
   };
-  let { error } = await sb.from('capzii_orders').insert({ ...base, city, street, building, floor: floor || null, apartment: apt });
+  const pay = { payment_method: payMethod, payment_status: payMethod === 'CARD' ? 'PENDING' : 'UNPAID' };
+  let { error } = await sb.from('capzii_orders').insert({ ...base, ...pay, city, street, building, floor: floor || null, apartment: apt });
   // if the new address columns are not in the database yet, still save the order with the full address text
-  if (error && /column|schema cache/i.test(error.message || '')) ({ error } = await sb.from('capzii_orders').insert(base));
-  btn.disabled = false; btn.textContent = 'PLACE ORDER →';
+  if (error && /column|schema cache/i.test(error.message || '')) {
+    if (payMethod === 'CARD') { btn.disabled = false; btn.textContent = payLabel(); return fail('Card payment is not available yet. Please choose cash on delivery.'); }
+    ({ error } = await sb.from('capzii_orders').insert(base));
+  }
+  btn.disabled = false; btn.textContent = payLabel();
 
   if (error) { console.error(error); return fail('Could not place your order. Please try again or order via WhatsApp.'); }
+  if (payMethod === 'CARD') {
+    btn.disabled = true; btn.textContent = 'REDIRECTING TO PAYMENT...';
+    const { data, error: fe } = await sb.functions.invoke('create-payment', { body: { order_number: orderNumber } });
+    if (fe || !data || !data.url) { btn.disabled = false; btn.textContent = payLabel(); return fail('Could not start the card payment. Your order is saved — choose cash on delivery or contact us on WhatsApp.'); }
+    try { sessionStorage.setItem('capzii_last_order', orderNumber); } catch (e) {}
+    window.location.href = data.url; return;
+  }
   showOrderSuccess(orderNumber);
 }
+
+// returning from the card payment page
+(function () {
+  const q = new URLSearchParams(location.search);
+  if (q.get('pay') !== 'done') return;
+  history.replaceState(null, '', location.pathname);
+  let no = ''; try { no = sessionStorage.getItem('capzii_last_order') || ''; } catch (e) {}
+  setTimeout(() => {
+    if (q.get('success') === 'false') { alert('The payment was not completed. Your order is saved as unpaid — you can try again or choose cash on delivery.'); return; }
+    openCheckout(); showOrderSuccess(no || 'CPZ');
+  }, 600);
+})();
 
 function showOrderSuccess(orderNumber) {
   cart = []; saveCart();
@@ -2251,8 +2306,10 @@ function showOrderSuccess(orderNumber) {
 async function loadShopSettings() {
   try {
     const { data } = await sb.from('site_settings').select('key,value')
-      .in('key', ['shipping_cost', 'shipping_days', 'free_shipping_at', 'shipping_rates']);
+      .in('key', ['shipping_cost', 'shipping_days', 'free_shipping_at', 'shipping_rates', 'payment_cod_enabled', 'payment_card_enabled']);
     (data || []).forEach(s => {
+      if (s.key === 'payment_cod_enabled') PAY_COD = s.value !== 'false';
+      if (s.key === 'payment_card_enabled') PAY_CARD = s.value === 'true';
       if (s.key === 'free_shipping_at' && s.value !== '' && !isNaN(Number(s.value))) FREE_SHIPPING_AT = Number(s.value);
       if (s.key === 'shipping_rates') { try { shippingRates = JSON.parse(s.value || '{}') || {}; } catch (e) {} }
       if (s.key === 'shipping_cost' && !isNaN(Number(s.value))) shippingFee = Number(s.value);
