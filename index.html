@@ -442,6 +442,39 @@ header nav a{white-space:nowrap}
 .product-colors{gap:8px}
 .co-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .filter-tab{text-transform:uppercase}
+.rack-section{background:#fff;padding:56px 0 24px;overflow:hidden}
+.rack-head{text-align:center;padding:0 20px 8px}
+.rack-kicker{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999}
+.rack-title{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-1px;text-transform:uppercase;color:#111;margin-top:6px}
+.rack-stage{position:relative;height:clamp(470px,66vh,560px)}
+.rack-scroll{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;transition:filter .45s,opacity .45s;cursor:grab;touch-action:pan-x pan-y}
+.rack-scroll::-webkit-scrollbar{display:none}
+.rack-scroll.grabbing{cursor:grabbing}
+.rack-rail{position:relative;display:flex;width:max-content;min-width:100%;padding:28px 6vw 0;box-sizing:border-box}
+.rack-rail::before{content:"";position:absolute;left:0;right:0;top:28px;height:2px;background:#111}
+.rack-item{flex:0 0 auto;width:clamp(120px,15vw,190px);margin:0 clamp(8px,1.6vw,24px);display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;cursor:inherit;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.rack-swing{transform-origin:50% 0;display:flex;flex-direction:column;align-items:center;width:100%;will-change:transform}
+.rack-pin{width:9px;height:9px;border-radius:50%;background:#111;margin-top:-4px}
+.rack-string{width:1px;height:34px;background:#111;opacity:.55}
+.rack-img{width:100%;aspect-ratio:1;object-fit:contain;mix-blend-mode:multiply;pointer-events:none;user-select:none;filter:drop-shadow(0 14px 14px rgba(0,0,0,.12));transition:transform .3s}
+.rack-item:hover .rack-img{transform:scale(1.05)}
+.rack-name{margin-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#111;text-align:center}
+.rack-price{font-size:10px;color:#888;margin-top:2px}
+.rack-arrow{position:absolute;top:44%;width:42px;height:42px;border-radius:50%;border:1px solid #ddd;background:#fff;font-size:20px;line-height:1;cursor:pointer;z-index:3;color:#111}
+.rack-arrow.prev{left:14px}.rack-arrow.next{right:14px}
+@media(hover:none){.rack-arrow{display:none}}
+.rack-focus{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:4;text-align:center;padding:0 20px}
+.rack-stage.focus .rack-focus{display:flex}
+.rack-stage.focus .rack-scroll{filter:blur(9px);opacity:.2;pointer-events:none}
+#rf-img{width:min(54vw,260px);height:min(54vw,260px);object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 22px 22px rgba(0,0,0,.16))}
+.rf-name{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;color:#111}
+.rf-price{font-size:13px;color:#555;margin-top:4px}
+.rf-colors{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.rf-colors .color-dot{width:22px;height:22px}
+.rf-btns{display:flex;gap:10px;margin-top:16px}
+.rf-add,.rf-more{padding:11px 24px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:inherit;border:1px solid #111}
+.rf-add{background:#111;color:#fff}.rf-more{background:#fff;color:#111}
+.rack-close{position:absolute;top:8px;right:max(16px,4vw);width:36px;height:36px;border-radius:50%;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;color:#111}
 </style>
 </head>
 <body>
@@ -586,6 +619,23 @@ header nav a{white-space:nowrap}
 </div>
 
 <!-- SHOP SECTION -->
+<!-- THE RACK -->
+<section class="rack-section" id="rack" style="display:none">
+  <div class="rack-head"><p class="rack-kicker" id="rack-hint"></p><h2 class="rack-title" id="rack-title"></h2></div>
+  <div class="rack-stage" id="rack-stage">
+    <div class="rack-scroll" id="rack-scroll"><div class="rack-rail" id="rack-rail"></div></div>
+    <button class="rack-arrow prev" aria-label="Previous" onclick="rackScroll(-1)">‹</button>
+    <button class="rack-arrow next" aria-label="Next" onclick="rackScroll(1)">›</button>
+    <div class="rack-focus" id="rack-focus" aria-hidden="true" onclick="if(event.target===this)rackClose()">
+      <button class="rack-close" aria-label="Close" onclick="rackClose()">✕</button>
+      <img id="rf-img" alt="">
+      <div class="rf-info"><p class="rf-name" id="rf-name"></p><p class="rf-price" id="rf-price"></p>
+        <div class="rf-colors" id="rf-colors"></div>
+        <div class="rf-btns"><button class="rf-add" onclick="rackAdd()">ADD TO BAG</button><button class="rf-more" onclick="rackMore()">DETAILS</button></div></div>
+    </div>
+  </div>
+</section>
+
 <section class="products-section" id="shop">
   <h2 class="shop-title" id="products-title">NEW ARRIVALS</h2>
   <!-- Toolbar -->
@@ -1886,6 +1936,7 @@ function renderPublicProducts(products) {
   const grid = document.getElementById('products-grid');
   let filtered = products;
   renderFilterTabs();
+  renderRack();
   if (activeFilter !== 'all') filtered = products.filter(p => prodCols(p).includes(activeFilter));
 
   if (!filtered.length) {
@@ -2320,7 +2371,7 @@ async function loadShopSettings() {
 }
 
 // ── FRONT PAGE CMS (everything editable from Admin → Front Page) ──
-const FP_GROUPS = [{"t": "Announcement Bar", "s": "Scrolling strip at the very top", "f": [{"k": "announcement_active", "t": "toggle", "l": "Show announcement bar", "d": "true"}, {"k": "announcement_text", "t": "textarea", "l": "Messages (separate with | )", "d": "FREE SHIPPING ON ORDERS OVER 500 EGP | CASH ON DELIVERY | LIMITED DROPS AVAILABLE NOW"}, {"k": "color_bar_bg", "t": "color", "l": "Bar color", "d": "#111111"}, {"k": "color_bar_text", "t": "color", "l": "Bar text color", "d": "#FFFFFF"}]}, {"t": "Hero", "s": "Big banner image under the menu", "w": 1, "f": [{"k": "hero_image", "t": "image", "l": "Hero image", "d": ""}, {"k": "hero_overlay", "t": "range", "l": "Image darkness (0-80)", "d": "35"}, {"k": "hero_title", "t": "text", "l": "Title (leave empty to hide)", "d": "CROWN YOUR STYLE"}, {"k": "hero_subtitle", "t": "text", "l": "Subtitle (optional)", "d": ""}, {"k": "hero_button_text", "t": "text", "l": "Button text (empty hides it)", "d": "Shop Now"}, {"k": "hero_button_link", "t": "text", "l": "Button link", "d": "#shop"}]}, {"t": "Menu", "s": "One link per line: Label|#section or https://...", "f": [{"k": "nav_links", "t": "textarea", "l": "Menu links", "d": "Shop|#shop\nDrops|#drops\nAbout|#about"}]}, {"t": "Products Section", "s": "Title, layout and discount badges", "f": [{"k": "products_title", "t": "text", "l": "Section title", "d": "NEW ARRIVALS"}, {"k": "shop_default_view", "t": "select", "l": "Default grid", "d": "4", "o": ["1", "2", "4"]}, {"k": "promo_tag_active", "t": "toggle", "l": "Show promo tag on cards", "d": "false"}, {"k": "promo_tag_text", "t": "text", "l": "Promo tag text", "d": "BUY 2 GET 1 FREE"}, {"k": "color_badge_bg", "t": "color", "l": "Discount badge color", "d": "#BEA47A"}, {"k": "color_badge_text", "t": "color", "l": "Discount badge text", "d": "#111111"}]}, {"t": "Brand Accent", "s": "Signature accent used across the site", "f": [{"k": "color_accent", "t": "color", "l": "Accent color", "d": "#BEA47A"}]}, {"t": "Sections & Footer", "s": "Show/hide and edit text", "f": [{"k": "features_active", "t": "toggle", "l": "Show features strip", "d": "true"}, {"k": "drops_active", "t": "toggle", "l": "Show drops section", "d": "true"}, {"k": "drops_label", "t": "text", "l": "Drops label", "d": "LIMITED DROPS"}, {"k": "drops_title", "t": "text", "l": "Drops title", "d": "Built. Not Branded."}, {"k": "drops_body", "t": "textarea", "l": "Drops text", "d": "Each drop is a limited run. When it's gone, it's gone. No restocks. No compromises. Just construction, proportion, and restraint — done right, every time."}, {"k": "footer_tagline", "t": "text", "l": "Footer tagline", "d": "Premium streetwear born in Cairo. Limited drops, intentional design."}, {"k": "instagram_url", "t": "text", "l": "Instagram link", "d": "https://www.instagram.com/capzi.i/"}]}];
+const FP_GROUPS = [{"t": "Announcement Bar", "s": "Scrolling strip at the very top", "f": [{"k": "announcement_active", "t": "toggle", "l": "Show announcement bar", "d": "true"}, {"k": "announcement_text", "t": "textarea", "l": "Messages (separate with | )", "d": "FREE SHIPPING ON ORDERS OVER 500 EGP | CASH ON DELIVERY | LIMITED DROPS AVAILABLE NOW"}, {"k": "color_bar_bg", "t": "color", "l": "Bar color", "d": "#111111"}, {"k": "color_bar_text", "t": "color", "l": "Bar text color", "d": "#FFFFFF"}]}, {"t": "Hero", "s": "Big banner image under the menu", "w": 1, "f": [{"k": "hero_image", "t": "image", "l": "Hero image", "d": ""}, {"k": "hero_overlay", "t": "range", "l": "Image darkness (0-80)", "d": "35"}, {"k": "hero_title", "t": "text", "l": "Title (leave empty to hide)", "d": "CROWN YOUR STYLE"}, {"k": "hero_subtitle", "t": "text", "l": "Subtitle (optional)", "d": ""}, {"k": "hero_button_text", "t": "text", "l": "Button text (empty hides it)", "d": "Shop Now"}, {"k": "hero_button_link", "t": "text", "l": "Button link", "d": "#shop"}]}, {"t": "Menu", "s": "One link per line: Label|#section or https://...", "f": [{"k": "nav_links", "t": "textarea", "l": "Menu links", "d": "Shop|#shop\nDrops|#drops\nAbout|#about"}]}, {"t": "The Rack (hanging caps)", "s": "Interactive caps showcase under the hero", "f": [{"k": "rack_active", "t": "toggle", "l": "Show The Rack", "d": "true"}, {"k": "rack_title", "t": "text", "l": "Title", "d": "THE RACK"}, {"k": "rack_hint", "t": "text", "l": "Small text above the title", "d": "Drag · tap a cap to see it up close"}, {"k": "rack_count", "t": "text", "l": "How many caps (2-16)", "d": "10"}, {"k": "rack_collection", "t": "text", "l": "Collection id (empty = all products, e.g. new)", "d": ""}]}, {"t": "Products Section", "s": "Title, layout and discount badges", "f": [{"k": "products_title", "t": "text", "l": "Section title", "d": "NEW ARRIVALS"}, {"k": "shop_default_view", "t": "select", "l": "Default grid", "d": "4", "o": ["1", "2", "4"]}, {"k": "promo_tag_active", "t": "toggle", "l": "Show promo tag on cards", "d": "false"}, {"k": "promo_tag_text", "t": "text", "l": "Promo tag text", "d": "BUY 2 GET 1 FREE"}, {"k": "color_badge_bg", "t": "color", "l": "Discount badge color", "d": "#BEA47A"}, {"k": "color_badge_text", "t": "color", "l": "Discount badge text", "d": "#111111"}]}, {"t": "Brand Accent", "s": "Signature accent used across the site", "f": [{"k": "color_accent", "t": "color", "l": "Accent color", "d": "#BEA47A"}]}, {"t": "Sections & Footer", "s": "Show/hide and edit text", "f": [{"k": "features_active", "t": "toggle", "l": "Show features strip", "d": "true"}, {"k": "drops_active", "t": "toggle", "l": "Show drops section", "d": "true"}, {"k": "drops_label", "t": "text", "l": "Drops label", "d": "LIMITED DROPS"}, {"k": "drops_title", "t": "text", "l": "Drops title", "d": "Built. Not Branded."}, {"k": "drops_body", "t": "textarea", "l": "Drops text", "d": "Each drop is a limited run. When it's gone, it's gone. No restocks. No compromises. Just construction, proportion, and restraint — done right, every time."}, {"k": "footer_tagline", "t": "text", "l": "Footer tagline", "d": "Premium streetwear born in Cairo. Limited drops, intentional design."}, {"k": "instagram_url", "t": "text", "l": "Instagram link", "d": "https://www.instagram.com/capzi.i/"}]}];
 const FP_DEF = {}; FP_GROUPS.forEach(g => g.f.forEach(f => FP_DEF[f.k] = f.d));
 let SITE = {};
 const gid = id => document.getElementById(id);
@@ -2364,6 +2415,7 @@ function applySiteContent(map) {
   gid('drops').style.display = fpOn('drops_active') ? '' : 'none';
   document.querySelectorAll('[data-cms]').forEach(el => { el.textContent = fpGet(el.dataset.cms); });
   document.querySelectorAll('[data-cms-href]').forEach(el => { el.href = safeHref(fpGet(el.dataset.cmsHref), el.href); });
+  renderRack();
   if (allProducts.length) renderPublicProducts(allProducts);
 }
 async function loadSiteContent() {
@@ -2447,6 +2499,105 @@ async function fpUpload(k, input) {
   msg.textContent = 'Uploaded — press SAVE ALL CHANGES to publish.'; input.value = '';
 }
 fpRender();
+
+// ── THE RACK: hanging caps showcase (swing physics + focus view) ──
+const RK = { list: [], nodes: [], sig: '', cur: null, ci: 0, lx: null, lt: 0, ls: 0, t: 0, raf: 0, moved: false };
+const rkReduce = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+const rkJSON = v => { try { return JSON.parse(typeof v === 'string' ? v : JSON.stringify(v || '[]')); } catch (e) { return []; } };
+const rkImg = (p, ci) => { const c = rkJSON(p.colors)[ci || 0]; return (c && c.image) || (rkJSON(p.images)[0] || {}).url || ''; };
+
+function renderRack() {
+  const sec = document.getElementById('rack'); if (!sec) return;
+  let list = allProducts.slice();
+  const col = String(fpGet('rack_collection') || '').trim();
+  if (col) list = list.filter(p => prodCols(p).includes(col));
+  list = list.filter(p => rkImg(p, 0)).slice(0, Math.max(2, Math.min(16, parseInt(fpGet('rack_count')) || 10)));
+  if (!fpOn('rack_active') || list.length < 2) { sec.style.display = 'none'; rkStop(); return; }
+  sec.style.display = '';
+  const t = document.getElementById('rack-title'), h = document.getElementById('rack-hint');
+  t.textContent = fpGet('rack_title'); t.style.display = fpGet('rack_title') ? '' : 'none';
+  h.textContent = fpGet('rack_hint'); h.style.display = fpGet('rack_hint') ? '' : 'none';
+  const sig = list.map(p => p.id + ':' + rkImg(p, 0) + ':' + p.base_price).join();
+  if (sig !== RK.sig) {
+    RK.sig = sig; RK.list = list;
+    const rail = document.getElementById('rack-rail');
+    rail.innerHTML = list.map((p, i) => `<button class="rack-item" data-i="${i}" aria-label="${esc(p.name)}"><span class="rack-swing"><span class="rack-pin"></span><span class="rack-string"></span><img class="rack-img" src="${esc(rkImg(p, 0))}" alt="" draggable="false" loading="lazy"></span><span class="rack-name">${esc(p.name)}</span><span class="rack-price">${money(p.base_price)}</span></button>`).join('');
+    RK.nodes = [...rail.children].map(el => ({ el, sw: el.querySelector('.rack-swing'), a: 0, v: 0, ph: Math.random() * 6.28, amp: .8 + Math.random() * 1.4, fr: .5 + Math.random() * .5 }));
+  }
+  rkStart();
+}
+function rkTick(t) {
+  RK.raf = requestAnimationFrame(rkTick);
+  const dt = Math.min(.033, (t - (RK.t || t)) / 1000); RK.t = t;
+  for (const n of RK.nodes) {
+    const target = rkReduce ? 0 : Math.sin(t / 1000 * n.fr * 3.14 + n.ph) * n.amp;
+    n.v += (-55 * (n.a - target) - 4.2 * n.v) * dt; n.a += n.v * dt;
+    if (n.a > 28) { n.a = 28; n.v *= -.3; } else if (n.a < -28) { n.a = -28; n.v *= -.3; }
+    n.sw.style.transform = 'rotate(' + n.a.toFixed(2) + 'deg)';
+  }
+}
+function rkStart() { if (!RK.raf && RK.visible !== false) RK.raf = requestAnimationFrame(rkTick); }
+function rkStop() { cancelAnimationFrame(RK.raf); RK.raf = 0; }
+
+(function rackInit() {
+  const sc = document.getElementById('rack-scroll'); if (!sc) return;
+  let down = false, sx = 0, sl = 0;
+  sc.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') { down = true; RK.moved = false; sx = e.clientX; sl = sc.scrollLeft; } });
+  window.addEventListener('pointerup', () => { down = false; sc.classList.remove('grabbing'); });
+  sc.addEventListener('pointermove', e => {
+    const now = performance.now();
+    if (down && Math.abs(e.clientX - sx) > 5) { RK.moved = true; sc.classList.add('grabbing'); sc.scrollLeft = sl - (e.clientX - sx); }
+    if (RK.lx !== null) {
+      const vx = (e.clientX - RK.lx) / Math.max(8, now - RK.lt);
+      for (const n of RK.nodes) { const r = n.el.getBoundingClientRect(), d = Math.abs(e.clientX - (r.left + r.width / 2)); if (d < 170) n.v += vx * (1 - d / 170) * 38; }
+    }
+    RK.lx = e.clientX; RK.lt = now;
+  });
+  sc.addEventListener('pointerleave', () => { RK.lx = null; });
+  sc.addEventListener('scroll', () => {
+    const d = Math.max(-60, Math.min(60, sc.scrollLeft - RK.ls)); RK.ls = sc.scrollLeft;
+    for (const n of RK.nodes) n.v -= d * 1.2;
+  }, { passive: true });
+  document.getElementById('rack-rail').addEventListener('click', e => {
+    const b = e.target.closest('.rack-item'); if (!b || RK.moved) return;
+    rackOpen(+b.dataset.i);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') rackClose(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(en => { RK.visible = en[0].isIntersecting; RK.visible ? rkStart() : rkStop(); }).observe(document.getElementById('rack'));
+})();
+
+function rackScroll(dir) { const sc = document.getElementById('rack-scroll'); sc.scrollBy({ left: dir * sc.clientWidth * .7, behavior: 'smooth' }); }
+function rackFill() {
+  const p = RK.cur, cols = rkJSON(p.colors), c = cols[RK.ci];
+  document.getElementById('rf-img').src = (c && c.image) || rkImg(p, 0);
+  document.getElementById('rf-name').textContent = p.name;
+  document.getElementById('rf-price').textContent = money(p.base_price) + (c && c.name ? ' · ' + c.name : '');
+  document.getElementById('rf-colors').innerHTML = cols.length > 1 ? cols.map((k, i) => `<button type="button" class="color-dot${i === RK.ci ? ' active' : ''}" style="background:${esc(k.hex)}" title="${esc(k.name)}" aria-label="${esc(k.name)}" onclick="rackColor(${i})"></button>`).join('') : '';
+}
+function rackOpen(i) {
+  RK.cur = RK.list[i]; RK.ci = 0;
+  const from = RK.nodes[i].el.querySelector('.rack-img').getBoundingClientRect();
+  document.getElementById('rack-stage').classList.add('focus');
+  document.getElementById('rack-focus').setAttribute('aria-hidden', 'false');
+  rackFill();
+  const img = document.getElementById('rf-img'), to = img.getBoundingClientRect();
+  if (!rkReduce && to.width && img.animate) {
+    img.animate([{ transform: `translate(${from.left + from.width / 2 - to.left - to.width / 2}px,${from.top + from.height / 2 - to.top - to.height / 2}px) scale(${from.width / to.width})` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    document.querySelector('.rf-info').animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 160, easing: 'ease-out', fill: 'backwards' });
+  }
+}
+function rackColor(i) {
+  RK.ci = i; rackFill();
+  const img = document.getElementById('rf-img'); if (img.animate && !rkReduce) img.animate([{ opacity: .2, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
+}
+function rackClose() { document.getElementById('rack-stage').classList.remove('focus'); document.getElementById('rack-focus').setAttribute('aria-hidden', 'true'); }
+function rackAdd() {
+  const p = RK.cur, c = rkJSON(p.colors)[RK.ci] || {}, key = p.id + '|' + (c.name || '');
+  const ex = cart.find(x => x.key === key);
+  if (ex) ex.qty += 1; else cart.push({ key, id: p.id, name: p.name, color: c.name || '', price: Number(p.base_price), image: c.image || rkImg(p, 0), qty: 1 });
+  saveCart(); rackClose(); openCart();
+}
+function rackMore() { const p = RK.cur, ci = RK.ci; rackClose(); openProductModal(p, ci); }
 
 // Initial load
 renderCart();
