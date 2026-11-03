@@ -442,48 +442,6 @@ header nav a{white-space:nowrap}
 .product-colors{gap:8px}
 .co-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .filter-tab{text-transform:uppercase}
-.rack-section{background:#fff;padding:56px 0 24px;overflow:hidden}
-.rack-head{text-align:center;padding:0 20px 8px}
-.rack-kicker{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999}
-.rack-title{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-1px;text-transform:uppercase;color:#111;margin-top:6px}
-.rack-stage{position:relative;height:clamp(470px,66vh,560px)}
-.rack-scroll{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;transition:filter .45s,opacity .45s;cursor:grab;touch-action:pan-x pan-y}
-.rack-scroll::-webkit-scrollbar{display:none}
-.rack-scroll.grabbing{cursor:grabbing}
-.rack-rail{position:relative;display:flex;width:max-content;min-width:100%;padding:28px 6vw 0;box-sizing:border-box}
-.rack-rail::before{content:"";position:absolute;left:0;right:0;top:28px;height:2px;background:#111}
-.rack-item{flex:0 0 auto;width:clamp(120px,15vw,190px);margin:0 clamp(8px,1.6vw,24px);display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;cursor:inherit;font-family:inherit;-webkit-tap-highlight-color:transparent}
-.rack-swing{transform-origin:50% 0;display:flex;flex-direction:column;align-items:center;width:100%;will-change:transform}
-.rack-pin{width:9px;height:9px;border-radius:50%;background:#111;margin-top:-4px}
-.rack-string{width:1px;height:34px;background:#111;opacity:.55}
-.rack-img{width:100%;aspect-ratio:1;object-fit:contain;mix-blend-mode:multiply;pointer-events:none;user-select:none;filter:drop-shadow(0 14px 14px rgba(0,0,0,.12));transition:transform .3s}
-.rack-item:hover .rack-img{transform:scale(1.05)}
-.rack-name{margin-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#111;text-align:center}
-.rack-price{font-size:10px;color:#888;margin-top:2px}
-.rack-arrow{position:absolute;top:44%;width:42px;height:42px;border-radius:50%;border:1px solid #ddd;background:#fff;font-size:20px;line-height:1;cursor:pointer;z-index:3;color:#111}
-.rack-arrow.prev{left:14px}.rack-arrow.next{right:14px}
-@media(hover:none){.rack-arrow{display:none}}
-.rack-focus{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:4;text-align:center;padding:0 20px}
-.rack-stage.focus .rack-focus{display:flex}
-.rack-stage.focus .rack-scroll{filter:blur(9px);opacity:.2;pointer-events:none}
-#rf-img{width:min(54vw,260px);height:min(54vw,260px);object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 22px 22px rgba(0,0,0,.16))}
-.rf-name{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;color:#111}
-.rf-price{font-size:13px;color:#555;margin-top:4px}
-.rf-colors{display:flex;gap:10px;justify-content:center;margin-top:12px}
-.rf-colors .color-dot{width:22px;height:22px}
-.rf-btns{display:flex;gap:10px;margin-top:16px}
-.rf-add,.rf-more{padding:11px 24px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:inherit;border:1px solid #111}
-.rf-add{background:#111;color:#fff}.rf-more{background:#fff;color:#111}
-.rack-close{position:absolute;top:8px;right:max(16px,4vw);width:36px;height:36px;border-radius:50%;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;color:#111}
-#rack-gl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;display:none;transition:filter .45s,opacity .45s}
-.rack-3d #rack-gl{display:block}
-.rack-3d .rack-swing{visibility:hidden}
-.rack-3d .rack-img{aspect-ratio:3/2}
-.rack-stage.focus #rack-gl{filter:blur(9px);opacity:.2}
-#rf-3d{display:none;width:min(72vw,340px);height:min(56vw,270px);touch-action:none;cursor:grab}
-.rack-3d.f3d #rf-3d{display:block}
-.rack-3d.f3d #rf-img{display:none}
-.rf-view{background:none;border:0;font-size:10px;letter-spacing:1.5px;font-weight:700;color:#888;cursor:pointer;margin-top:10px;text-decoration:underline;font-family:inherit}
 </style>
 </head>
 <body>
@@ -628,26 +586,6 @@ header nav a{white-space:nowrap}
 </div>
 
 <!-- SHOP SECTION -->
-<!-- THE RACK -->
-<section class="rack-section" id="rack" style="display:none">
-  <div class="rack-head"><p class="rack-kicker" id="rack-hint"></p><h2 class="rack-title" id="rack-title"></h2></div>
-  <div class="rack-stage" id="rack-stage">
-    <div class="rack-scroll" id="rack-scroll"><div class="rack-rail" id="rack-rail"></div></div>
-    <canvas id="rack-gl" aria-hidden="true"></canvas>
-    <button class="rack-arrow prev" aria-label="Previous" onclick="rackScroll(-1)">‹</button>
-    <button class="rack-arrow next" aria-label="Next" onclick="rackScroll(1)">›</button>
-    <div class="rack-focus" id="rack-focus" aria-hidden="true" onclick="if(event.target===this)rackClose()">
-      <button class="rack-close" aria-label="Close" onclick="rackClose()">✕</button>
-      <img id="rf-img" alt="">
-      <canvas id="rf-3d" aria-label="Rotate the cap"></canvas>
-      <div class="rf-info"><p class="rf-name" id="rf-name"></p><p class="rf-price" id="rf-price"></p>
-        <div class="rf-colors" id="rf-colors"></div>
-        <div class="rf-btns"><button class="rf-add" onclick="rackAdd()">ADD TO BAG</button><button class="rf-more" onclick="rackMore()">DETAILS</button></div>
-        <button class="rf-view" id="rf-view" onclick="rackView()" style="display:none">VIEW PHOTO</button></div>
-    </div>
-  </div>
-</section>
-
 <section class="products-section" id="shop">
   <h2 class="shop-title" id="products-title">NEW ARRIVALS</h2>
   <!-- Toolbar -->
@@ -1948,7 +1886,6 @@ function renderPublicProducts(products) {
   const grid = document.getElementById('products-grid');
   let filtered = products;
   renderFilterTabs();
-  renderRack();
   if (activeFilter !== 'all') filtered = products.filter(p => prodCols(p).includes(activeFilter));
 
   if (!filtered.length) {
@@ -2383,7 +2320,7 @@ async function loadShopSettings() {
 }
 
 // ── FRONT PAGE CMS (everything editable from Admin → Front Page) ──
-const FP_GROUPS = [{"t": "Announcement Bar", "s": "Scrolling strip at the very top", "f": [{"k": "announcement_active", "t": "toggle", "l": "Show announcement bar", "d": "true"}, {"k": "announcement_text", "t": "textarea", "l": "Messages (separate with | )", "d": "FREE SHIPPING ON ORDERS OVER 500 EGP | CASH ON DELIVERY | LIMITED DROPS AVAILABLE NOW"}, {"k": "color_bar_bg", "t": "color", "l": "Bar color", "d": "#111111"}, {"k": "color_bar_text", "t": "color", "l": "Bar text color", "d": "#FFFFFF"}]}, {"t": "Hero", "s": "Big banner image under the menu", "w": 1, "f": [{"k": "hero_image", "t": "image", "l": "Hero image", "d": ""}, {"k": "hero_overlay", "t": "range", "l": "Image darkness (0-80)", "d": "35"}, {"k": "hero_title", "t": "text", "l": "Title (leave empty to hide)", "d": "CROWN YOUR STYLE"}, {"k": "hero_subtitle", "t": "text", "l": "Subtitle (optional)", "d": ""}, {"k": "hero_button_text", "t": "text", "l": "Button text (empty hides it)", "d": "Shop Now"}, {"k": "hero_button_link", "t": "text", "l": "Button link", "d": "#shop"}]}, {"t": "Menu", "s": "One link per line: Label|#section or https://...", "f": [{"k": "nav_links", "t": "textarea", "l": "Menu links", "d": "Shop|#shop\nDrops|#drops\nAbout|#about"}]}, {"t": "The Rack (hanging caps)", "s": "Interactive caps showcase under the hero", "f": [{"k": "rack_active", "t": "toggle", "l": "Show The Rack", "d": "true"}, {"k": "rack_3d", "t": "toggle", "l": "3D caps (real 3D objects)", "d": "true"}, {"k": "rack_title", "t": "text", "l": "Title", "d": "THE RACK"}, {"k": "rack_hint", "t": "text", "l": "Small text above the title", "d": "Drag · tap a cap to see it up close"}, {"k": "rack_count", "t": "text", "l": "How many caps (2-16)", "d": "10"}, {"k": "rack_collection", "t": "text", "l": "Collection id (empty = all products, e.g. new)", "d": ""}]}, {"t": "Products Section", "s": "Title, layout and discount badges", "f": [{"k": "products_title", "t": "text", "l": "Section title", "d": "NEW ARRIVALS"}, {"k": "shop_default_view", "t": "select", "l": "Default grid", "d": "4", "o": ["1", "2", "4"]}, {"k": "promo_tag_active", "t": "toggle", "l": "Show promo tag on cards", "d": "false"}, {"k": "promo_tag_text", "t": "text", "l": "Promo tag text", "d": "BUY 2 GET 1 FREE"}, {"k": "color_badge_bg", "t": "color", "l": "Discount badge color", "d": "#BEA47A"}, {"k": "color_badge_text", "t": "color", "l": "Discount badge text", "d": "#111111"}]}, {"t": "Brand Accent", "s": "Signature accent used across the site", "f": [{"k": "color_accent", "t": "color", "l": "Accent color", "d": "#BEA47A"}]}, {"t": "Sections & Footer", "s": "Show/hide and edit text", "f": [{"k": "features_active", "t": "toggle", "l": "Show features strip", "d": "true"}, {"k": "drops_active", "t": "toggle", "l": "Show drops section", "d": "true"}, {"k": "drops_label", "t": "text", "l": "Drops label", "d": "LIMITED DROPS"}, {"k": "drops_title", "t": "text", "l": "Drops title", "d": "Built. Not Branded."}, {"k": "drops_body", "t": "textarea", "l": "Drops text", "d": "Each drop is a limited run. When it's gone, it's gone. No restocks. No compromises. Just construction, proportion, and restraint — done right, every time."}, {"k": "footer_tagline", "t": "text", "l": "Footer tagline", "d": "Premium streetwear born in Cairo. Limited drops, intentional design."}, {"k": "instagram_url", "t": "text", "l": "Instagram link", "d": "https://www.instagram.com/capzi.i/"}]}];
+const FP_GROUPS = [{"t": "Announcement Bar", "s": "Scrolling strip at the very top", "f": [{"k": "announcement_active", "t": "toggle", "l": "Show announcement bar", "d": "true"}, {"k": "announcement_text", "t": "textarea", "l": "Messages (separate with | )", "d": "FREE SHIPPING ON ORDERS OVER 500 EGP | CASH ON DELIVERY | LIMITED DROPS AVAILABLE NOW"}, {"k": "color_bar_bg", "t": "color", "l": "Bar color", "d": "#111111"}, {"k": "color_bar_text", "t": "color", "l": "Bar text color", "d": "#FFFFFF"}]}, {"t": "Hero", "s": "Big banner image under the menu", "w": 1, "f": [{"k": "hero_image", "t": "image", "l": "Hero image", "d": ""}, {"k": "hero_overlay", "t": "range", "l": "Image darkness (0-80)", "d": "35"}, {"k": "hero_title", "t": "text", "l": "Title (leave empty to hide)", "d": "CROWN YOUR STYLE"}, {"k": "hero_subtitle", "t": "text", "l": "Subtitle (optional)", "d": ""}, {"k": "hero_button_text", "t": "text", "l": "Button text (empty hides it)", "d": "Shop Now"}, {"k": "hero_button_link", "t": "text", "l": "Button link", "d": "#shop"}]}, {"t": "Menu", "s": "One link per line: Label|#section or https://...", "f": [{"k": "nav_links", "t": "textarea", "l": "Menu links", "d": "Shop|#shop\nDrops|#drops\nAbout|#about"}]}, {"t": "Products Section", "s": "Title, layout and discount badges", "f": [{"k": "products_title", "t": "text", "l": "Section title", "d": "NEW ARRIVALS"}, {"k": "shop_default_view", "t": "select", "l": "Default grid", "d": "4", "o": ["1", "2", "4"]}, {"k": "promo_tag_active", "t": "toggle", "l": "Show promo tag on cards", "d": "false"}, {"k": "promo_tag_text", "t": "text", "l": "Promo tag text", "d": "BUY 2 GET 1 FREE"}, {"k": "color_badge_bg", "t": "color", "l": "Discount badge color", "d": "#BEA47A"}, {"k": "color_badge_text", "t": "color", "l": "Discount badge text", "d": "#111111"}]}, {"t": "Brand Accent", "s": "Signature accent used across the site", "f": [{"k": "color_accent", "t": "color", "l": "Accent color", "d": "#BEA47A"}]}, {"t": "Sections & Footer", "s": "Show/hide and edit text", "f": [{"k": "features_active", "t": "toggle", "l": "Show features strip", "d": "true"}, {"k": "drops_active", "t": "toggle", "l": "Show drops section", "d": "true"}, {"k": "drops_label", "t": "text", "l": "Drops label", "d": "LIMITED DROPS"}, {"k": "drops_title", "t": "text", "l": "Drops title", "d": "Built. Not Branded."}, {"k": "drops_body", "t": "textarea", "l": "Drops text", "d": "Each drop is a limited run. When it's gone, it's gone. No restocks. No compromises. Just construction, proportion, and restraint — done right, every time."}, {"k": "footer_tagline", "t": "text", "l": "Footer tagline", "d": "Premium streetwear born in Cairo. Limited drops, intentional design."}, {"k": "instagram_url", "t": "text", "l": "Instagram link", "d": "https://www.instagram.com/capzi.i/"}]}];
 const FP_DEF = {}; FP_GROUPS.forEach(g => g.f.forEach(f => FP_DEF[f.k] = f.d));
 let SITE = {};
 const gid = id => document.getElementById(id);
@@ -2427,7 +2364,6 @@ function applySiteContent(map) {
   gid('drops').style.display = fpOn('drops_active') ? '' : 'none';
   document.querySelectorAll('[data-cms]').forEach(el => { el.textContent = fpGet(el.dataset.cms); });
   document.querySelectorAll('[data-cms-href]').forEach(el => { el.href = safeHref(fpGet(el.dataset.cmsHref), el.href); });
-  renderRack();
   if (allProducts.length) renderPublicProducts(allProducts);
 }
 async function loadSiteContent() {
@@ -2511,258 +2447,6 @@ async function fpUpload(k, input) {
   msg.textContent = 'Uploaded — press SAVE ALL CHANGES to publish.'; input.value = '';
 }
 fpRender();
-
-// ── THE RACK: hanging caps showcase (swing physics + focus view) ──
-const RK3 = { on: false, failed: false, busy: false, f: null, items: [], ppu: 70 };
-const RK = { focused: false, photo: false, list: [], nodes: [], sig: '', cur: null, ci: 0, lx: null, lt: 0, ls: 0, t: 0, raf: 0, moved: false };
-const rkReduce = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)').matches : false;
-const rkJSON = v => { try { return JSON.parse(typeof v === 'string' ? v : JSON.stringify(v || '[]')); } catch (e) { return []; } };
-const rkImg = (p, ci) => { const c = rkJSON(p.colors)[ci || 0]; return (c && c.image) || (rkJSON(p.images)[0] || {}).url || ''; };
-
-function renderRack() {
-  const sec = document.getElementById('rack'); if (!sec) return;
-  let list = allProducts.slice();
-  const col = String(fpGet('rack_collection') || '').trim();
-  if (col) list = list.filter(p => prodCols(p).includes(col));
-  list = list.filter(p => rkImg(p, 0)).slice(0, Math.max(2, Math.min(16, parseInt(fpGet('rack_count')) || 10)));
-  if (!fpOn('rack_active') || list.length < 2) { sec.style.display = 'none'; rkStop(); return; }
-  sec.style.display = '';
-  const t = document.getElementById('rack-title'), h = document.getElementById('rack-hint');
-  t.textContent = fpGet('rack_title'); t.style.display = fpGet('rack_title') ? '' : 'none';
-  h.textContent = fpGet('rack_hint'); h.style.display = fpGet('rack_hint') ? '' : 'none';
-  const sig = list.map(p => p.id + ':' + rkImg(p, 0) + ':' + p.base_price).join();
-  if (sig !== RK.sig) {
-    RK.sig = sig; RK.list = list;
-    const rail = document.getElementById('rack-rail');
-    rail.innerHTML = list.map((p, i) => `<button class="rack-item" data-i="${i}" aria-label="${esc(p.name)}"><span class="rack-swing"><span class="rack-pin"></span><span class="rack-string"></span><img class="rack-img" src="${esc(rkImg(p, 0))}" alt="" draggable="false" loading="lazy"></span><span class="rack-name">${esc(p.name)}</span><span class="rack-price">${money(p.base_price)}</span></button>`).join('');
-    RK.nodes = [...rail.children].map(el => ({ el, sw: el.querySelector('.rack-swing'), a: 0, v: 0, y: 0, yv: 0, ph: Math.random() * 6.28, amp: .8 + Math.random() * 1.4, fr: .5 + Math.random() * .5 }));
-  }
-  if (sig !== RK.sig3) { RK.sig3 = sig; if (RK3.on) rk3dItems(); }
-  if (fpOn('rack_3d')) rk3dEnable(); else rk3dDisable();
-  rkStart();
-}
-function rkTick(t) {
-  RK.raf = requestAnimationFrame(rkTick);
-  const dt = Math.min(.033, (t - (RK.t || t)) / 1000); RK.t = t;
-  for (const n of RK.nodes) {
-    const target = rkReduce ? 0 : Math.sin(t / 1000 * n.fr * 3.14 + n.ph) * n.amp;
-    n.v += (-55 * (n.a - target) - 4.2 * n.v) * dt; n.a += n.v * dt;
-    if (n.a > 28) { n.a = 28; n.v *= -.3; } else if (n.a < -28) { n.a = -28; n.v *= -.3; }
-    n.sw.style.transform = 'rotate(' + n.a.toFixed(2) + 'deg)';
-    n.yv += (-14 * (n.y - Math.sin(t / 1000 * .5 + n.ph) * (rkReduce ? 0 : .5)) - 2.6 * n.yv) * dt; n.y += n.yv * dt;
-  }
-  if (RK3.on) rk3dFrame();
-  if (RK.focused && RK3.f && RK3.f.holder && document.getElementById('rack-stage').classList.contains('f3d')) rf3dFrame(dt);
-}
-function rkStart() { if (!RK.raf && RK.visible !== false) RK.raf = requestAnimationFrame(rkTick); }
-function rkStop() { cancelAnimationFrame(RK.raf); RK.raf = 0; }
-
-(function rackInit() {
-  const sc = document.getElementById('rack-scroll'); if (!sc) return;
-  let down = false, sx = 0, sl = 0;
-  sc.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') { down = true; RK.moved = false; sx = e.clientX; sl = sc.scrollLeft; } });
-  window.addEventListener('pointerup', () => { down = false; sc.classList.remove('grabbing'); });
-  sc.addEventListener('pointermove', e => {
-    const now = performance.now();
-    if (down && Math.abs(e.clientX - sx) > 5) { RK.moved = true; sc.classList.add('grabbing'); sc.scrollLeft = sl - (e.clientX - sx); }
-    if (RK.lx !== null) {
-      const vx = (e.clientX - RK.lx) / Math.max(8, now - RK.lt);
-      for (const n of RK.nodes) { const r = n.el.getBoundingClientRect(), d = Math.abs(e.clientX - (r.left + r.width / 2)); if (d < 170) { n.v += vx * (1 - d / 170) * 38; n.yv += vx * (1 - d / 170) * 1.6; } }
-    }
-    RK.lx = e.clientX; RK.lt = now;
-  });
-  sc.addEventListener('pointerleave', () => { RK.lx = null; });
-  sc.addEventListener('scroll', () => {
-    const d = Math.max(-60, Math.min(60, sc.scrollLeft - RK.ls)); RK.ls = sc.scrollLeft;
-    for (const n of RK.nodes) n.v -= d * 1.2;
-  }, { passive: true });
-  document.getElementById('rack-rail').addEventListener('click', e => {
-    const b = e.target.closest('.rack-item'); if (!b || RK.moved) return;
-    rackOpen(+b.dataset.i);
-  });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') rackClose(); });
-  if ('IntersectionObserver' in window) new IntersectionObserver(en => { RK.visible = en[0].isIntersecting; RK.visible ? rkStart() : rkStop(); }).observe(document.getElementById('rack'));
-})();
-
-// ── 3D CAP START ──
-const CAP3D = { loading: null, tex: {} };
-function cap3dLoad() {
-  if (!CAP3D.loading) CAP3D.loading = new Promise(res => {
-    if (window.THREE) return res(true);
-    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-    sc.onload = () => res(!!window.THREE); sc.onerror = () => res(false); document.head.appendChild(sc);
-  });
-  return CAP3D.loading;
-}
-function webglOK() { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } }
-function rkHex(p, ci) { const c = rkJSON(p.colors)[ci || 0]; return c && /^#[0-9a-f]{6}$/i.test(c.hex || '') ? c.hex : '#111111'; }
-
-function capTex(hex, acc) {
-  const key = hex + acc; if (CAP3D.tex[key]) return CAP3D.tex[key];
-  const W = 1024, H = 512, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')]; };
-  const [cv, g] = mk(), [bv, b] = mk();
-  g.fillStyle = hex; g.fillRect(0, 0, W, H); b.fillStyle = '#808080'; b.fillRect(0, 0, W, H);
-  for (let y = 0; y < H; y += 3) { g.fillStyle = 'rgba(0,0,0,.07)'; g.fillRect(0, y, W, 1); b.fillStyle = 'rgba(0,0,0,.25)'; b.fillRect(0, y, W, 1); }
-  for (let x = 0; x < W; x += 3) { g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(x, 0, 1, H); b.fillStyle = 'rgba(255,255,255,.2)'; b.fillRect(x, 0, 1, H); }
-  for (let k = 0; k < 6; k++) {
-    const x = (k + .5) * W / 6, ex = k * W / 6;
-    g.fillStyle = 'rgba(0,0,0,.38)'; g.fillRect(x - 2, 0, 4, H); b.fillStyle = '#000'; b.fillRect(x - 3, 0, 6, H);
-    g.fillStyle = 'rgba(255,255,255,.16)'; for (let y = 6; y < H; y += 12) { g.fillRect(x - 9, y, 2, 6); g.fillRect(x + 7, y, 2, 6); }
-    g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(ex, H * .16, 7, 0, 6.3); g.fill();
-    b.fillStyle = '#000'; b.beginPath(); b.arc(ex, H * .16, 7, 0, 6.3); b.fill();
-  }
-  const r = parseInt(hex.slice(1, 3), 16), gg = parseInt(hex.slice(3, 5), 16), bl = parseInt(hex.slice(5, 7), 16);
-  g.save(); g.translate(W * .25, H * .55); g.scale(1, 1.4);
-  g.font = '700 56px Poppins, Helvetica, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillStyle = (.299 * r + .587 * gg + .114 * bl) > 150 ? '#111111' : acc; g.fillText('capzii', 0, 0); g.restore();
-  const T = THREE, map = new T.CanvasTexture(cv), bump = new T.CanvasTexture(bv);
-  map.anisotropy = bump.anisotropy = 8;
-  return CAP3D.tex[key] = { map, bump };
-}
-
-// a real 3D cap: domed six-panel crown, curved brim, button, sweatband, back strap
-function buildCap(hex) {
-  const T = THREE, acc = (typeof fpGet === 'function' && fpHex(fpGet('color_accent'), '#BEA47A')) || '#BEA47A';
-  const tex = capTex(hex, acc), grp = new T.Group();
-  const fabric = new T.MeshStandardMaterial({ map: tex.map, bumpMap: tex.bump, bumpScale: 1.4, roughness: .92, metalness: 0 });
-  const plain = new T.MeshStandardMaterial({ color: hex, roughness: .9, metalness: 0 });
-  const dark = new T.MeshStandardMaterial({ color: 0x141414, roughness: 1, side: T.DoubleSide });
-
-  const crownGeo = new T.SphereGeometry(1, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2); crownGeo.scale(1, .95, 1.06);
-  grp.add(new T.Mesh(crownGeo, fabric));
-  const inner = new T.Mesh(crownGeo, new T.MeshStandardMaterial({ color: 0x1a1a1a, side: T.BackSide, roughness: 1 })); inner.scale.set(.985, .985, .985); grp.add(inner);
-  const band = new T.Mesh(new T.TorusGeometry(1, .035, 12, 64), dark); band.rotation.x = Math.PI / 2; band.scale.set(1, 1.06, 1); grp.add(band);
-
-  const sh = new T.Shape(); sh.moveTo(1.03, 0); sh.absellipse(0, 0, 1.03, 1.5, 0, Math.PI, false); sh.lineTo(-1, 0); sh.absellipse(0, 0, 1, 1.06, Math.PI, 0, true);
-  const bg = new T.ExtrudeGeometry(sh, { depth: .045, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2, curveSegments: 40 });
-  bg.rotateX(Math.PI / 2);
-  const pos = bg.attributes.position;
-  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i), d = Math.max(0, Math.hypot(x, z / 1.06) - 1); pos.setY(i, pos.getY(i) - d * (.34 + .3 * x * x)); }
-  bg.computeVertexNormals();
-  const brim = new T.Mesh(bg, plain); brim.rotation.x = .06; brim.position.y = .005; grp.add(brim);
-
-  const btn = new T.Mesh(new T.SphereGeometry(.08, 20, 12), plain); btn.position.y = .96; grp.add(btn);
-  const strap = new T.Mesh(new T.BoxGeometry(.55, .11, .03), plain); strap.position.set(0, .2, -1.05); strap.rotation.x = -.12; grp.add(strap);
-  const buckle = new T.Mesh(new T.BoxGeometry(.16, .13, .04), new T.MeshStandardMaterial({ color: 0xc9b58a, roughness: .35, metalness: .85 })); buckle.position.set(.18, .2, -1.075); buckle.rotation.x = -.12; grp.add(buckle);
-  return grp;
-}
-// ── 3D CAP END ──
-
-function rk3dResize() {
-  if (!RK3.r) return;
-  const st = document.getElementById('rack-stage'), w = st.clientWidth, h = st.clientHeight; if (!w || !h) return;
-  RK3.w = w; RK3.h = h;
-  RK3.r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); RK3.r.setSize(w, h, false);
-  const n0 = RK.nodes[0]; RK3.ppu = n0 ? Math.max(40, n0.el.offsetWidth * .92 / 2.2) : 70;
-  RK3.cam.aspect = w / h; RK3.cam.position.z = (h / RK3.ppu / 2) / Math.tan(10 * Math.PI / 180); RK3.cam.updateProjectionMatrix();
-  RK3.railY = (h / 2 - 28) / RK3.ppu;
-}
-function rk3dItems() {
-  const T = THREE; RK3.items.forEach(it => RK3.scene.remove(it.pivot)); RK3.items = [];
-  const L = .55;
-  RK.list.forEach((p, i) => {
-    const pivot = new T.Group(), cap = buildCap(rkHex(p, 0)); cap.position.y = -(.98 + L); cap.rotation.x = .06;
-    const str = new T.Mesh(new T.CylinderGeometry(.012, .012, L, 6), new T.MeshBasicMaterial({ color: 0x111111 })); str.position.y = -L / 2;
-    const pin = new T.Mesh(new T.SphereGeometry(.055, 12, 8), new T.MeshBasicMaterial({ color: 0x111111 }));
-    pivot.add(str, pin, cap); RK3.scene.add(pivot); RK3.items.push({ pivot, cap });
-  });
-  rk3dResize();
-}
-async function rk3dEnable() {
-  const st = document.getElementById('rack-stage');
-  if (RK3.on) { st.classList.add('rack-3d'); return; }
-  if (RK3.busy || RK3.failed) return;
-  if (!webglOK()) { RK3.failed = true; return; }
-  RK3.busy = true; const ok = await cap3dLoad(); RK3.busy = false;
-  if (!ok) { RK3.failed = true; return; }
-  const T = THREE;
-  try { RK3.r = new T.WebGLRenderer({ canvas: document.getElementById('rack-gl'), alpha: true, antialias: true }); } catch (e) { RK3.failed = true; return; }
-  RK3.r.setClearColor(0x000000, 0);
-  RK3.scene = new T.Scene(); RK3.cam = new T.PerspectiveCamera(20, 1, .1, 100);
-  RK3.scene.add(new T.HemisphereLight(0xffffff, 0x9a9a9a, .95)); const dl = new T.DirectionalLight(0xffffff, .6); dl.position.set(-3, 5, 6); RK3.scene.add(dl);
-  RK3.on = true; st.classList.add('rack-3d');
-  rk3dItems();
-  if ('ResizeObserver' in window) new ResizeObserver(rk3dResize).observe(st); else window.addEventListener('resize', rk3dResize);
-}
-function rk3dDisable() { document.getElementById('rack-stage').classList.remove('rack-3d', 'f3d'); RK3.on = false; }
-function rk3dFrame() {
-  if (!RK3.w) { rk3dResize(); if (!RK3.w) return; }
-  const sc = document.getElementById('rack-scroll'), ppu = RK3.ppu;
-  RK3.cam.position.x = (sc.scrollLeft + RK3.w / 2) / ppu;
-  RK3.items.forEach((it, i) => {
-    const n = RK.nodes[i]; if (!n) return;
-    it.pivot.position.set((n.el.offsetLeft + n.el.offsetWidth / 2) / ppu, RK3.railY, 0);
-    it.pivot.rotation.z = -n.a * Math.PI / 180; it.cap.rotation.y = n.y;
-  });
-  RK3.r.render(RK3.scene, RK3.cam);
-}
-// focus view: one big cap you can spin with your finger / mouse
-function rf3dInit() {
-  if (RK3.f) return RK3.f; const T = THREE, cv = document.getElementById('rf-3d');
-  const r = new T.WebGLRenderer({ canvas: cv, alpha: true, antialias: true }); r.setClearColor(0x000000, 0);
-  const scene = new T.Scene(), cam = new T.PerspectiveCamera(26, 1, .1, 50); cam.position.set(0, .35, 5.4); cam.lookAt(0, 0, 0);
-  scene.add(new T.HemisphereLight(0xffffff, 0x9a9a9a, .95)); const dl = new T.DirectionalLight(0xffffff, .65); dl.position.set(-3, 5, 6); scene.add(dl);
-  const f = RK3.f = { r, scene, cam, holder: null, yaw: .6, pitch: .14, drag: false, pop: 1 };
-  let lx = 0, ly = 0;
-  cv.addEventListener('pointerdown', e => { f.drag = true; lx = e.clientX; ly = e.clientY; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener('pointermove', e => { if (!f.drag) return; f.yaw += (e.clientX - lx) * .012; f.pitch = Math.max(-.5, Math.min(.7, f.pitch + (e.clientY - ly) * .008)); lx = e.clientX; ly = e.clientY; });
-  const up = () => { f.drag = false; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-  return f;
-}
-function rf3dSet(hex) {
-  const f = rf3dInit(), T = THREE, cv = document.getElementById('rf-3d');
-  if (f.holder) f.scene.remove(f.holder);
-  const cap = buildCap(hex); cap.position.y = -.5; const h = new T.Group(); h.add(cap); h.rotation.order = 'XYZ'; f.scene.add(h); f.holder = h; f.pop = 0;
-  const w = cv.clientWidth, hh = cv.clientHeight;
-  if (w && hh) { f.r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); f.r.setSize(w, hh, false); f.cam.aspect = w / hh; f.cam.updateProjectionMatrix(); }
-}
-function rf3dFrame(dt) {
-  const f = RK3.f; if (!f.drag && !rkReduce) f.yaw += dt * .5;
-  f.pop = Math.min(1, f.pop + dt * 4); const k = .88 + .12 * (1 - Math.pow(1 - f.pop, 3));
-  f.holder.scale.set(k, k, k); f.holder.rotation.set(f.pitch, f.yaw, 0);
-  f.r.render(f.scene, f.cam);
-}
-function rackView() {
-  RK.photo = !RK.photo; const st = document.getElementById('rack-stage');
-  st.classList.toggle('f3d', !RK.photo);
-  document.getElementById('rf-view').textContent = RK.photo ? 'VIEW IN 3D' : 'VIEW PHOTO';
-  if (!RK.photo && RK3.f) rf3dSet(rkHex(RK.cur, RK.ci));
-}
-
-function rackScroll(dir) { const sc = document.getElementById('rack-scroll'); sc.scrollBy({ left: dir * sc.clientWidth * .7, behavior: 'smooth' }); }
-function rackFill() {
-  const p = RK.cur, cols = rkJSON(p.colors), c = cols[RK.ci];
-  document.getElementById('rf-img').src = (c && c.image) || rkImg(p, 0);
-  document.getElementById('rf-name').textContent = p.name;
-  document.getElementById('rf-price').textContent = money(p.base_price) + (c && c.name ? ' · ' + c.name : '');
-  if (RK3.on) { document.getElementById('rf-view').style.display = ''; rf3dSet(rkHex(p, RK.ci)); }
-  document.getElementById('rf-colors').innerHTML = cols.length > 1 ? cols.map((k, i) => `<button type="button" class="color-dot${i === RK.ci ? ' active' : ''}" style="background:${esc(k.hex)}" title="${esc(k.name)}" aria-label="${esc(k.name)}" onclick="rackColor(${i})"></button>`).join('') : '';
-}
-function rackOpen(i) {
-  RK.cur = RK.list[i]; RK.ci = 0; RK.focused = true;
-  const from = RK.nodes[i].el.querySelector('.rack-img').getBoundingClientRect();
-  document.getElementById('rack-stage').classList.add('focus');
-  document.getElementById('rack-focus').setAttribute('aria-hidden', 'false');
-  const st = document.getElementById('rack-stage'); st.classList.toggle('f3d', RK3.on && !RK.photo);
-  rackFill();
-  const img = document.getElementById(RK3.on && !RK.photo ? 'rf-3d' : 'rf-img'), to = img.getBoundingClientRect();
-  if (!rkReduce && to.width && img.animate) {
-    img.animate([{ transform: `translate(${from.left + from.width / 2 - to.left - to.width / 2}px,${from.top + from.height / 2 - to.top - to.height / 2}px) scale(${from.width / to.width})` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)' });
-    document.querySelector('.rf-info').animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 160, easing: 'ease-out', fill: 'backwards' });
-  }
-}
-function rackColor(i) {
-  RK.ci = i; rackFill();
-  const img = document.getElementById(RK3.on && !RK.photo ? 'rf-3d' : 'rf-img'); if (img.animate && !rkReduce) img.animate([{ opacity: .2, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
-}
-function rackClose() { RK.focused = false; document.getElementById('rack-stage').classList.remove('focus'); document.getElementById('rack-focus').setAttribute('aria-hidden', 'true'); }
-function rackAdd() {
-  const p = RK.cur, c = rkJSON(p.colors)[RK.ci] || {}, key = p.id + '|' + (c.name || '');
-  const ex = cart.find(x => x.key === key);
-  if (ex) ex.qty += 1; else cart.push({ key, id: p.id, name: p.name, color: c.name || '', price: Number(p.base_price), image: c.image || rkImg(p, 0), qty: 1 });
-  saveCart(); rackClose(); openCart();
-}
-function rackMore() { const p = RK.cur, ci = RK.ci; rackClose(); openProductModal(p, ci); }
 
 // Initial load
 renderCart();
