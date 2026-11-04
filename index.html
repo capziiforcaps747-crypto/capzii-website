@@ -1225,8 +1225,22 @@ async function doSignIn() {
   btn.disabled=true; btn.textContent='Signing in...';
   err.style.display='none';
   const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) { err.textContent='Invalid email or password.'; err.style.display='block'; btn.disabled=false; btn.textContent='Sign In'; }
+  if (error) {
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('not confirmed')) err.innerHTML = 'Your email is not confirmed yet. Open the confirmation email (check spam too) or <a href="#" onclick="resendConfirm();return false" style="text-decoration:underline;font-weight:700">resend it</a>.';
+    else if (m.includes('invalid login')) err.textContent = 'Wrong email or password. If you just created the account, confirm your email first.';
+    else if (m.includes('rate limit') || error.status === 429) err.textContent = 'Too many attempts. Please wait a few minutes and try again.';
+    else err.textContent = error.message || 'Could not sign in. Please try again.';
+    err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign In';
+  }
   else { closeAuthModal(); }
+}
+async function resendConfirm() {
+  const email = document.getElementById('signin-email').value.trim(), err = document.getElementById('signin-error');
+  if (!email) { err.textContent = 'Type your email above first.'; return; }
+  err.textContent = 'Sending…';
+  const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: window.location.origin + window.location.pathname } });
+  err.textContent = error ? (/rate limit/i.test(error.message) ? 'Too many emails sent. Please wait a while and try again.' : error.message) : 'Confirmation email sent. Check your inbox and spam.';
 }
 
 document.getElementById('signin-password').addEventListener('keydown', e => { if(e.key==='Enter') doSignIn(); });
